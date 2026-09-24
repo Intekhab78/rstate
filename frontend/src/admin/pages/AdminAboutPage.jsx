@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { apiFetch } from '../utils/adminApi';
+import { apiFetch, getUploadUrl, resolveFileUrl } from '../utils/adminApi';
 import {
   Info,
   Save,
@@ -151,7 +151,8 @@ export default function AdminAboutPage() {
 
     const token = localStorage.getItem('saffpol_admin_token');
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const uploadUrl = await getUploadUrl();
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -160,7 +161,8 @@ export default function AdminAboutPage() {
       });
       const data = await response.json();
       if (data.success && data.file_url) {
-        callback(`http://localhost:5000${data.file_url}`);
+        const fullUrl = await resolveFileUrl(data.file_url);
+        callback(fullUrl);
       } else {
         alert(data.message || 'Image upload failed.');
       }

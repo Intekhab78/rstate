@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../utils/adminApi';
+import { getServerRoot } from '../../utils/api.js';
 import {
   FolderKanban,
   Wrench,
@@ -23,6 +24,11 @@ function AdminDashboard() {
   });
   const [recentEnquiries, setRecentEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [apiHost, setApiHost] = useState('Detecting...');
+
+  useEffect(() => {
+    getServerRoot().then(root => setApiHost(root));
+  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -225,7 +231,7 @@ function AdminDashboard() {
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span>API Host</span>
-                <span className="text-slate-200 font-mono">http://localhost:5000</span>
+                <span className="text-slate-200 font-mono text-xs truncate max-w-[180px]" id="api-host-display">{apiHost}</span>
               </div>
               <div className="flex justify-between py-1">
                 <span>Auth Protocol</span>

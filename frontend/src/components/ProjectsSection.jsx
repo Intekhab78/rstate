@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import { ArrowRight } from "lucide-react";
 
 const GOLD = "#CF974A";
@@ -56,7 +57,7 @@ const ProjectsSection = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5000/api/projects");
+        const response = await apiFetch("/projects");
         if (!response.ok) {
           throw new Error("Failed to fetch projects from backend");
         }

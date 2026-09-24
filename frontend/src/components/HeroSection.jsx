@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Tag
 } from "lucide-react";
+import { apiFetch } from "../utils/api.js";
 
 const GOLD = "#CF974A";
 const GOLD_TRANSLUCENT = "rgba(207, 151, 74, 0.82)";
@@ -58,7 +59,7 @@ export default function HeroSection() {
     let isMounted = true;
     const fetchHero = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/hero");
+        const res = await apiFetch("/hero");
         if (!res.ok) throw new Error("Failed to fetch hero API");
         const json = await res.json();
         if (isMounted && json.success && json.data) {

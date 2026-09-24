@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import {
   ArrowUpRight,
   Building2,
@@ -311,7 +312,7 @@ function ProjectsGallery() {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:5000/api/projects");
+        const res = await apiFetch("/projects");
         if (!res.ok) throw new Error("API response error");
         const data = await res.json();
         if (isMounted) {

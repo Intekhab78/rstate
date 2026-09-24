@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import {
   Award,
   Clock3,
@@ -219,7 +220,7 @@ export default function WhyChooseSaffpoll() {
     let isMounted = true;
     const fetchWhyChoose = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/why-choose");
+        const res = await apiFetch("/why-choose");
         if (!res.ok) throw new Error("Failed to fetch Why Choose API");
         const json = await res.json();
         if (isMounted && json.success && json.data) {

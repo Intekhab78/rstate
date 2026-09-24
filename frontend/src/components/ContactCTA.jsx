@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import { Phone, ArrowRight, Mail, MessageSquare, Send, Calendar } from "lucide-react";
 
 const GOLD = "#CF974A";
@@ -62,7 +63,7 @@ export default function ContactCTA() {
     let isMounted = true;
     const fetchContactCTA = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/contact-cta");
+        const res = await apiFetch("/contact-cta");
         if (!res.ok) throw new Error("Failed to fetch Contact CTA API");
         const json = await res.json();
         if (isMounted && json.success && json.data) {

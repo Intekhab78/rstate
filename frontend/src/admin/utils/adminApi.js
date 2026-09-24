@@ -1,5 +1,6 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+import { getApiBase, getServerRoot } from '../../utils/api.js';
 
+// ─── Auth Token Helpers ───────────────────────────────────────────────────────
 export const getAuthToken = () => {
   return localStorage.getItem('saffpol_admin_token');
 };
@@ -29,6 +30,7 @@ export const setStoredUser = (user) => {
   }
 };
 
+// ─── Smart apiFetch (auto local → online fallback) ────────────────────────────
 export const apiFetch = async (endpoint, options = {}) => {
   const token = getAuthToken();
   const headers = {
@@ -40,7 +42,8 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const apiBase = await getApiBase();
+  const response = await fetch(`${apiBase}${endpoint}`, {
     ...options,
     headers
   });
@@ -59,6 +62,21 @@ export const apiFetch = async (endpoint, options = {}) => {
   return { ok: response.ok, status: response.status, data };
 };
 
+// ─── Returns upload endpoint URL (local or online) ───────────────────────────
+export const getUploadUrl = async () => {
+  const apiBase = await getApiBase();
+  return `${apiBase}/upload`;
+};
+
+// ─── Resolves a file path to full URL (local or online server root) ───────────
+export const resolveFileUrl = async (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const root = await getServerRoot();
+  return `${root}${path}`;
+};
+
+// ─── Auth Actions ─────────────────────────────────────────────────────────────
 export const adminLogin = async (email, password) => {
   const result = await apiFetch('/auth/login', {
     method: 'POST',

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { apiFetch } from '../utils/adminApi';
+import { apiFetch, resolveFileUrl } from '../utils/adminApi';
 import { Inbox, FileText, CheckCircle2, Clock, Trash2, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 
 function AdminEnquiries() {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const [resolvedFileUrl, setResolvedFileUrl] = useState('');
 
   const fetchEnquiries = async () => {
     setLoading(true);
@@ -73,7 +74,15 @@ function AdminEnquiries() {
               {enquiries.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setSelectedEnquiry(item)}
+                  onClick={async () => {
+                    setSelectedEnquiry(item);
+                    if (item.file_url) {
+                      const url = await resolveFileUrl(item.file_url);
+                      setResolvedFileUrl(url);
+                    } else {
+                      setResolvedFileUrl('');
+                    }
+                  }}
                   className={`w-full p-4 text-left transition-colors flex flex-col gap-1.5 cursor-pointer ${
                     selectedEnquiry?.id === item.id
                       ? 'bg-amber-500/10 border-l-4 border-amber-500'
@@ -178,7 +187,7 @@ function AdminEnquiries() {
                       Attached Drawing / BOQ Document
                     </h4>
                     <a
-                      href={`http://localhost:5000${selectedEnquiry.file_url}`}
+                      href={resolvedFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-sm font-medium px-4 py-2 rounded-lg border border-slate-700 transition-colors"

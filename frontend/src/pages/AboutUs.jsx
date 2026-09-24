@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import {
     ArrowDownRight,
     ArrowRight,
@@ -222,7 +223,7 @@ export default function AboutUs() {
     useEffect(() => {
         const fetchAboutPage = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/about-page');
+                const response = await apiFetch('/about-page');
                 const data = await response.json();
                 if (data.success && data.data) {
                     setPageData((prev) => ({

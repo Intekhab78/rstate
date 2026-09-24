@@ -14,10 +14,19 @@ const PORT = process.env.PORT || 5000;
 // CORS configuration for Vite frontend
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: [
+      // ── Local Development ──────────────────────────
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:3000',
+      // ── Production / Deployed Frontend ─────────────
+      'https://rstate.jtsmiddleeast.com',
+      'http://rstate.jtsmiddleeast.com',
+    ],
     credentials: true
   })
 );
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import {
   ArrowUpRight,
   Building2,
@@ -242,7 +243,7 @@ export default function ContactUs() {
     let isMounted = true;
     const fetchContent = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/contact-page");
+        const res = await apiFetch("/contact-page");
         if (!res.ok) throw new Error("Failed to fetch Contact Page API");
         const json = await res.json();
         if (isMounted && json.success && json.data) {
@@ -272,7 +273,7 @@ export default function ContactUs() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await fetch("http://localhost:5000/api/enquiries", {
+      await apiFetch("/enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

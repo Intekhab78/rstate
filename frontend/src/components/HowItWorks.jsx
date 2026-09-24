@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import {
   Search,
   ClipboardList,
@@ -107,7 +108,7 @@ const HowItWorks = () => {
     let isMounted = true;
     const fetchHowItWorks = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/how-it-works");
+        const res = await apiFetch("/how-it-works");
         if (!res.ok) throw new Error("Failed to fetch How It Works API");
         const json = await res.json();
         if (isMounted && json.success && json.data) {

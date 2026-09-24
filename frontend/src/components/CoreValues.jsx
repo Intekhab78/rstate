@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 import {
   Handshake,
   ShieldCheck,
@@ -93,7 +94,7 @@ const CoreValues = () => {
     let isMounted = true;
     const fetchCoreValues = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/core-values");
+        const res = await apiFetch("/core-values");
         if (!res.ok) throw new Error("Failed to fetch core values API");
         const json = await res.json();
         if (isMounted && json.success && json.data) {
