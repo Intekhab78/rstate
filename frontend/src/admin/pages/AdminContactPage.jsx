@@ -34,6 +34,25 @@ const availableIcons = [
   { name: 'MessageSquare', label: 'Message / Chat' }
 ];
 
+const FALLBACK_FAQS = [
+  { id: 'faq_def_1', enabled: true, question: "What types of construction projects does Saffpoll handle?", answer: "Saffpoll works across residential construction, commercial projects, and renovation and extension requirements." },
+  { id: 'faq_def_2', enabled: true, question: "Can I discuss my project before making a decision?", answer: "Yes. Contact our team with your project requirements, location, scope, and timeline." },
+  { id: 'faq_def_3', enabled: true, question: "How long does a typical project take?", answer: "Project duration depends on size, scope, site conditions, materials, and approvals. Our team can discuss a realistic timeline after understanding your project." },
+  { id: 'faq_def_4', enabled: true, question: "Do you handle renovation and extension projects?", answer: "Yes. Renovation & Extensions is one of Saffpoll's core service areas." },
+  { id: 'faq_def_5', enabled: true, question: "Can I schedule a site visit?", answer: "You can contact Saffpoll to discuss a site visit. Share your location and requirements with the team." },
+];
+
+const FALLBACK_QUICK_ACTIONS = [
+  { id: 'qa_def_1', enabled: true, icon: "Phone",  title: "Call Us Directly", subtitle: "+91 98104 64083",    href: "tel:+919810464083" },
+  { id: 'qa_def_2', enabled: true, icon: "Mail",   title: "Email Our Team",   subtitle: "firoz@saffpoll.com", href: "mailto:firoz@saffpoll.com" },
+  { id: 'qa_def_3', enabled: true, icon: "MapPin", title: "Visit Our Office", subtitle: "Jasola Vihar, New Delhi", href: "#" },
+];
+
+const FALLBACK_CTA_BUTTONS = [
+  { id: 'cta_btn_1', enabled: true, text: 'Contact Us Now', link: '#contact-form', style: 'solid', icon: 'ArrowUpRight' },
+  { id: 'cta_btn_2', enabled: true, text: 'Call Our Team', link: 'tel:+919810464083', style: 'outline', icon: 'Phone' }
+];
+
 function AdminContactPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -111,14 +130,88 @@ function AdminContactPage() {
     const res = await apiFetch('/contact-page');
     if (res.ok && res.data.success && res.data.data) {
       const d = res.data.data;
-      if (d.hero) setHero(d.hero);
-      if (Array.isArray(d.contact_cards)) setContactCards(d.contact_cards);
-      if (d.form_settings) setFormSettings(d.form_settings);
-      if (d.office_info) setOfficeInfo(d.office_info);
-      if (Array.isArray(d.quick_actions)) setQuickActions(d.quick_actions);
-      if (d.map) setMap(d.map);
-      if (Array.isArray(d.faqs)) setFaqs(d.faqs);
-      if (d.final_cta) setFinalCTA(d.final_cta);
+      
+      setHero(prev => ({
+        ...prev,
+        ...d.hero,
+        tag: d.hero?.tag || 'Get In Touch',
+        title: d.hero?.title || "Let's Build Something Together",
+        subtitle: d.hero?.subtitle || "Whether you're planning a new project or have questions about our services, we're here to understand your requirements.",
+        bg_image: d.hero?.bg_image || "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2400&q=90",
+      }));
+
+      if (Array.isArray(d.contact_cards) && d.contact_cards.length > 0) {
+        setContactCards(d.contact_cards);
+      } else {
+        setContactCards([
+          { id: 'cc_1', enabled: true, icon: "Phone",  label: "Phone", href: "tel:+919810464083", lines: ["+91 98104 64083", "+91 85959 64083"] },
+          { id: 'cc_2', enabled: true, icon: "Mail",   label: "Email", href: "mailto:firoz@saffpoll.com", lines: ["firoz@saffpoll.com", "Send your project requirements"] },
+          { id: 'cc_3', enabled: true, icon: "MapPin", label: "Address", lines: ["144, Pocket 1 Street, Pocket 1,", "Jasola Vihar, New Delhi, India"] },
+          { id: 'cc_4', enabled: true, icon: "Clock3", label: "Working Hours", lines: ["Mon - Fri: 09:00 AM - 05:00 PM", "Saturday & Sunday: Closed"] },
+        ]);
+      }
+
+      setFormSettings(prev => ({
+        ...prev,
+        ...d.form_settings,
+        tag: d.form_settings?.tag || 'Contact Saffpoll',
+        title: d.form_settings?.title || 'Send Us a Message',
+        description: d.form_settings?.description || '',
+        service_options: (Array.isArray(d.form_settings?.service_options) && d.form_settings.service_options.length > 0)
+          ? d.form_settings.service_options
+          : [
+              { enabled: true, label: "Residential Construction", value: "Residential Construction" },
+              { enabled: true, label: "Commercial Projects", value: "Commercial Projects" },
+              { enabled: true, label: "Renovation & Extensions", value: "Renovation & Extensions" },
+              { enabled: true, label: "General Construction", value: "General Construction" },
+              { enabled: true, label: "Other Requirement", value: "Other" },
+            ]
+      }));
+
+      setOfficeInfo(prev => ({
+        ...prev,
+        ...d.office_info,
+        tag: d.office_info?.tag || 'Our Office',
+        title: d.office_info?.title || 'Visit or Connect With Us',
+        description: d.office_info?.description || 'Saffpoll is based in Jasola Vihar, New Delhi. Reach out to discuss your construction, renovation, or commercial project requirements.',
+        badge: d.office_info?.badge || 'Saffpoll',
+        heading: d.office_info?.heading || 'Jasola Vihar, New Delhi',
+        image_url: d.office_info?.image_url || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=90',
+        address_lines: (Array.isArray(d.office_info?.address_lines) && d.office_info.address_lines.length > 0) ? d.office_info.address_lines : ['144, Pocket 1 Street, Pocket 1,', 'Jasola Vihar, New Delhi, India'],
+        phones: (Array.isArray(d.office_info?.phones) && d.office_info.phones.length > 0) ? d.office_info.phones : ['+91 98104 64083', '+91 85959 64083'],
+        email: d.office_info?.email || 'firoz@saffpoll.com'
+      }));
+
+      if (Array.isArray(d.quick_actions) && d.quick_actions.length > 0) {
+        setQuickActions(d.quick_actions);
+      } else if (d.quick_actions && Array.isArray(d.quick_actions.actions) && d.quick_actions.actions.length > 0) {
+        setQuickActions(d.quick_actions.actions);
+      } else {
+        setQuickActions(FALLBACK_QUICK_ACTIONS);
+      }
+
+      setMap(prev => ({
+        ...prev,
+        ...d.map,
+        tag: d.map?.tag || 'Find Us',
+        title: d.map?.title || 'Our Location'
+      }));
+
+      if (Array.isArray(d.faqs) && d.faqs.length > 0) {
+        setFaqs(d.faqs);
+      } else if (d.faqs && Array.isArray(d.faqs.items) && d.faqs.items.length > 0) {
+        setFaqs(d.faqs.items);
+      } else {
+        setFaqs(FALLBACK_FAQS);
+      }
+
+      setFinalCTA(prev => ({
+        ...prev,
+        ...d.final_cta,
+        tag: d.final_cta?.tag || "Let's Build Together",
+        title: d.final_cta?.title || 'Ready to Start Your Project?',
+        buttons: (Array.isArray(d.final_cta?.buttons) && d.final_cta.buttons.length > 0) ? d.final_cta.buttons : FALLBACK_CTA_BUTTONS
+      }));
     }
     setLoading(false);
   };
@@ -666,12 +759,72 @@ function AdminContactPage() {
                 </div>
 
                 <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Office Description</label>
+                  <textarea
+                    rows="2"
+                    value={officeInfo.description || ''}
+                    onChange={(e) => setOfficeInfo({ ...officeInfo, description: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Badge Text</label>
+                  <input
+                    type="text"
+                    value={officeInfo.badge || ''}
+                    onChange={(e) => setOfficeInfo({ ...officeInfo, badge: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Card Heading (City)</label>
+                  <input
+                    type="text"
+                    value={officeInfo.heading || ''}
+                    onChange={(e) => setOfficeInfo({ ...officeInfo, heading: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Office Image URL</label>
                   <input
                     type="text"
                     value={officeInfo.image_url || ''}
                     onChange={(e) => setOfficeInfo({ ...officeInfo, image_url: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white font-mono"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Address Lines (One per line)</label>
+                  <textarea
+                    rows="2"
+                    value={Array.isArray(officeInfo.address_lines) ? officeInfo.address_lines.join('\n') : officeInfo.address_lines || ''}
+                    onChange={(e) => setOfficeInfo({ ...officeInfo, address_lines: e.target.value.split('\n') })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Phone Numbers (One per line)</label>
+                  <textarea
+                    rows="2"
+                    value={Array.isArray(officeInfo.phones) ? officeInfo.phones.join('\n') : officeInfo.phones || ''}
+                    onChange={(e) => setOfficeInfo({ ...officeInfo, phones: e.target.value.split('\n') })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Email Address</label>
+                  <input
+                    type="text"
+                    value={officeInfo.email || ''}
+                    onChange={(e) => setOfficeInfo({ ...officeInfo, email: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white"
                   />
                 </div>
               </div>
@@ -946,9 +1099,111 @@ function AdminContactPage() {
                   />
                 </div>
               </div>
+
+              {/* CTA Buttons */}
+              <div className="border-t border-slate-800 pt-5 space-y-4">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">CTA Buttons ({(finalCTA.buttons || []).length})</h3>
+                <div className="space-y-4">
+                  {(finalCTA.buttons || []).map((btn, idx) => {
+                    const isEnabled = btn.enabled !== false;
+                    return (
+                      <div key={btn.id || idx} className={`border rounded-xl p-4 space-y-3 ${isEnabled ? 'bg-slate-950 border-slate-800' : 'bg-slate-950/40 border-slate-800/50 opacity-60'}`}>
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                          <span className="text-xs font-mono font-bold text-amber-400">Button #{idx + 1}</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const copy = [...(finalCTA.buttons || [])];
+                                copy[idx].enabled = !isEnabled;
+                                setFinalCTA({ ...finalCTA, buttons: copy });
+                              }}
+                              className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${isEnabled ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
+                            >
+                              {isEnabled ? 'Enabled' : 'Disabled'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const copy = [...(finalCTA.buttons || [])];
+                                copy.splice(idx, 1);
+                                setFinalCTA({ ...finalCTA, buttons: copy });
+                              }}
+                              className="text-slate-400 hover:text-red-400 p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            value={btn.text || ''}
+                            onChange={(e) => {
+                              const copy = [...(finalCTA.buttons || [])];
+                              copy[idx].text = e.target.value;
+                              setFinalCTA({ ...finalCTA, buttons: copy });
+                            }}
+                            placeholder="Button Text"
+                            className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white"
+                          />
+                          <input
+                            type="text"
+                            value={btn.link || ''}
+                            onChange={(e) => {
+                              const copy = [...(finalCTA.buttons || [])];
+                              copy[idx].link = e.target.value;
+                              setFinalCTA({ ...finalCTA, buttons: copy });
+                            }}
+                            placeholder="Target URL / Link"
+                            className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white"
+                          />
+                          <select
+                            value={btn.style || 'solid'}
+                            onChange={(e) => {
+                              const copy = [...(finalCTA.buttons || [])];
+                              copy[idx].style = e.target.value;
+                              setFinalCTA({ ...finalCTA, buttons: copy });
+                            }}
+                            className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white"
+                          >
+                            <option value="solid">Solid Background</option>
+                            <option value="outline">Outline</option>
+                          </select>
+                          <select
+                            value={btn.icon || 'ArrowUpRight'}
+                            onChange={(e) => {
+                              const copy = [...(finalCTA.buttons || [])];
+                              copy[idx].icon = e.target.value;
+                              setFinalCTA({ ...finalCTA, buttons: copy });
+                            }}
+                            className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white"
+                          >
+                            {availableIcons.map((ic) => (
+                              <option key={ic.name} value={ic.name}>Icon: {ic.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newBtn = { id: `cta_btn_${Date.now()}`, enabled: true, text: 'New Button', link: '#', style: 'solid', icon: 'ArrowUpRight' };
+                      setFinalCTA({ ...finalCTA, buttons: [...(finalCTA.buttons || []), newBtn] });
+                    }}
+                    className="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-semibold px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add CTA Button
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-
         </div>
       )}
     </div>

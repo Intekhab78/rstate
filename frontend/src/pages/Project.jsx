@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../utils/api.js";
 import {
   ArrowUpRight,
@@ -116,9 +116,8 @@ function Reveal({
 function SectionLabel({ children, dark = false }) {
   return (
     <div
-      className={`mb-4 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.22em] ${
-        dark ? "text-[#CF974A]" : "text-[#CF974A]"
-      }`}
+      className={`mb-4 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.22em] ${dark ? "text-[#CF974A]" : "text-[#CF974A]"
+        }`}
     >
       <span className="h-[2px] w-8 bg-[#CF974A]" />
       <span>{children}</span>

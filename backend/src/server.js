@@ -40,7 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
   res.json({ status: 'ok', service: 'SaffPol CMS API', timestamp: new Date().toISOString() });
 });
 
