@@ -3,7 +3,7 @@
  *
  * Priority:
  *   1. Local backend  → http://localhost:5000
- *   2. Online backend → https://rstateapi.jtsonline.shop  (auto-fallback)
+ *   2. Online backend → https://rstateapi.jtsmiddleeast.com  (auto-fallback)
  *
  * How it works:
  *   - On startup, silently pings local backend's /api/health endpoint.
@@ -12,8 +12,8 @@
  *   - Result is cached for the session (no repeated pinging).
  */
 
-const LOCAL_URL  = 'http://localhost:5000';
-const ONLINE_URL = 'https://rstateapi.jtsonline.shop';
+const LOCAL_URL = 'http://localhost:5000';
+const ONLINE_URL = 'https://rstateapi.jtsmiddleeast.com';
 
 let resolvedBase = null;      // cached result
 let resolvingPromise = null;  // prevents parallel pings
@@ -78,7 +78,7 @@ export async function getServerRoot() {
  */
 export async function apiFetch(endpoint, options = {}) {
   const base = await getApiBase();
-  const url  = `${base}${endpoint}`;
+  const url = `${base}${endpoint}`;
   return fetch(url, options);
 }
 
