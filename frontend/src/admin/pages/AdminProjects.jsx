@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiFetch } from '../utils/adminApi';
-import { Plus, Edit2, Trash2, FolderKanban, Check, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, FolderKanban, Check, X, Image as ImageIcon, Settings } from 'lucide-react';
 
 function AdminProjects() {
   const [projects, setProjects] = useState([]);
@@ -9,6 +9,7 @@ function AdminProjects() {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     category: 'Industrial',
     location: '',
     description: '',
@@ -20,9 +21,38 @@ function AdminProjects() {
 
   const fetchProjects = async () => {
     setLoading(true);
-    const res = await apiFetch('/projects');
-    if (res.ok && res.data.success) {
-      setProjects(res.data.data || []);
+    try {
+      const res = await apiFetch('/projects');
+      let list = [];
+      if (res.ok && res.data.success) {
+        list = res.data.data || [];
+      }
+      const hasSaffpoll = list.some(p => p.slug === 'saffpoll-residences' || (p.title && p.title.toLowerCase().includes('saffpoll')));
+      if (!hasSaffpoll) {
+        list.unshift({
+          id: 'saffpoll-residences',
+          slug: 'saffpoll-residences',
+          title: 'SaffPoll Residences',
+          category: 'Premium Residential',
+          location: 'New Delhi, India',
+          description: 'A thoughtfully planned residential development designed around modern living, functional spaces and quality construction.',
+          image_url: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=90',
+          status: 'Under Construction'
+        });
+      }
+      setProjects(list);
+    } catch (e) {
+      console.error(e);
+      setProjects([{
+        id: 'saffpoll-residences',
+        slug: 'saffpoll-residences',
+        title: 'SaffPoll Residences',
+        category: 'Premium Residential',
+        location: 'New Delhi, India',
+        description: 'A thoughtfully planned residential development designed around modern living, functional spaces and quality construction.',
+        image_url: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=90',
+        status: 'Under Construction'
+      }]);
     }
     setLoading(false);
   };
@@ -35,6 +65,7 @@ function AdminProjects() {
     setEditingId(null);
     setFormData({
       title: '',
+      slug: '',
       category: 'Industrial',
       location: '',
       description: '',
@@ -48,6 +79,7 @@ function AdminProjects() {
     setEditingId(project.id);
     setFormData({
       title: project.title || '',
+      slug: project.slug || '',
       category: project.category || 'Industrial',
       location: project.location || '',
       description: project.description || '',
@@ -172,7 +204,13 @@ function AdminProjects() {
                         {proj.status || 'Completed'}
                       </span>
                     </td>
-                    <td className="p-4 text-right space-x-2">
+                    <td className="p-4 text-right flex items-center justify-end gap-2">
+                      <a
+                        href={`/admin/projects/edit/${proj.slug || proj.id}`}
+                        className="text-amber-500 hover:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg font-medium text-xs transition-colors flex items-center gap-1"
+                      >
+                        <Settings className="w-4 h-4" /> Advanced
+                      </a>
                       <button
                         onClick={() => openEditModal(proj)}
                         className="text-slate-400 hover:text-amber-400 p-1.5 rounded hover:bg-slate-800 transition-colors"
@@ -208,16 +246,29 @@ function AdminProjects() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Project Title</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Industrial Warehouse Flooring"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Project Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g. Industrial Warehouse Flooring"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">URL Slug</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                    placeholder="e.g. industrial-warehouse"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

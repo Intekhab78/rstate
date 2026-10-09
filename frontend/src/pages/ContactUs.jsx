@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../utils/api.js";
 import {
   ArrowUpRight,
@@ -46,6 +46,44 @@ const iconMap = {
 
 const isItemEnabled = (val) =>
   val !== false && val !== 0 && val !== "false" && val !== "0" && val !== null && val !== undefined;
+
+/* =========================================================
+   FALLBACK IMAGES & DATA
+========================================================= */
+
+const FALLBACK_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2400&q=90";
+const FALLBACK_OFFICE_IMAGE =
+  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=90";
+
+const FALLBACK_CARDS = [
+  { enabled: true, icon: "Phone",  label: "Phone",         href: "tel:+919810464083",       lines: ["+91 98104 64083", "+91 85959 64083"] },
+  { enabled: true, icon: "Mail",   label: "Email",         href: "mailto:firoz@saffpoll.com", lines: ["firoz@saffpoll.com", "Send your project requirements"] },
+  { enabled: true, icon: "MapPin", label: "Address",                                          lines: ["144, Pocket 1 Street, Pocket 1,\nJasola Vihar, New Delhi, India"] },
+  { enabled: true, icon: "Clock3", label: "Working Hours",                                   lines: ["Mon â€“ Fri: 09:00 AM â€“ 05:00 PM", "Saturday & Sunday: Closed"] },
+];
+
+const FALLBACK_FAQS = [
+  { enabled: true, question: "What types of construction projects does Saffpoll handle?", answer: "Saffpoll works across residential construction, commercial projects, and renovation and extension requirements." },
+  { enabled: true, question: "Can I discuss my project before making a decision?", answer: "Yes. Contact our team with your project requirements, location, scope, and timeline." },
+  { enabled: true, question: "How long does a typical project take?", answer: "Project duration depends on size, scope, site conditions, materials, and approvals. Our team can discuss a realistic timeline after understanding your project." },
+  { enabled: true, question: "Do you handle renovation and extension projects?", answer: "Yes. Renovation & Extensions is one of Saffpoll's core service areas." },
+  { enabled: true, question: "Can I schedule a site visit?", answer: "You can contact Saffpoll to discuss a site visit. Share your location and requirements with the team." },
+];
+
+const FALLBACK_SERVICE_OPTIONS = [
+  { enabled: true, label: "Residential Construction",  value: "Residential Construction" },
+  { enabled: true, label: "Commercial Projects",       value: "Commercial Projects" },
+  { enabled: true, label: "Renovation & Extensions",   value: "Renovation & Extensions" },
+  { enabled: true, label: "General Construction",      value: "General Construction" },
+  { enabled: true, label: "Other Requirement",         value: "Other" },
+];
+
+const FALLBACK_QUICK_ACTIONS = [
+  { enabled: true, icon: "Phone",  title: "Call Us Directly", subtitle: "+91 98104 64083",    href: "tel:+919810464083" },
+  { enabled: true, icon: "Mail",   title: "Email Our Team",   subtitle: "firoz@saffpoll.com", href: "mailto:firoz@saffpoll.com" },
+  { enabled: true, icon: "MapPin", title: "Visit Our Office", subtitle: "Jasola Vihar, New Delhi", href: "#" },
+];
 
 /* =========================================================
    REVEAL ANIMATION
@@ -116,9 +154,8 @@ function SectionLabel({ children, light = false }) {
   if (!children) return null;
   return (
     <div
-      className={`mb-4 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.22em] ${
-        light ? "text-[#CF974A]" : "text-[#CF974A]"
-      }`}
+      className={`mb-4 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.22em] ${light ? "text-[#CF974A]" : "text-[#CF974A]"
+        }`}
     >
       <span className="h-[2px] w-8 bg-[#CF974A]" />
       <span>{children}</span>
@@ -178,11 +215,10 @@ function ContactCard({
 function FAQItem({ question, answer, open, onClick }) {
   return (
     <div
-      className={`overflow-hidden rounded-2xl border transition-all duration-500 ${
-        open
+      className={`overflow-hidden rounded-2xl border transition-all duration-500 ${open
           ? "border-[#CF974A]/40 bg-[#CF974A]/[0.035] shadow-[0_12px_35px_rgba(207,151,74,0.08)]"
           : "border-slate-200 bg-white"
-      }`}
+        }`}
     >
       <button
         type="button"
@@ -194,20 +230,18 @@ function FAQItem({ question, answer, open, onClick }) {
         </span>
 
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
-            open
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${open
               ? "rotate-180 border-[#CF974A] bg-[#CF974A] text-white"
               : "border-slate-200 text-slate-500"
-          }`}
+            }`}
         >
           <ChevronDown size={18} />
         </span>
       </button>
 
       <div
-        className={`grid transition-all duration-500 ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
+        className={`grid transition-all duration-500 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
       >
         <div className="overflow-hidden">
           <div className="border-t border-[#CF974A]/10 px-6 pb-7 pt-5 text-[15px] leading-7 text-slate-600 md:px-8">
@@ -308,51 +342,66 @@ export default function ContactUs() {
     );
   }
 
-  if (!content) {
-    return null;
-  }
+  // â”€â”€ Use DB data where available, fall back to built-in defaults â”€â”€
+  const db = content || {};
 
-  // Filtered lists with resilient key mappings
-  const rawCards = Array.isArray(content.contact_cards) ? content.contact_cards : [];
+  // Contact cards
+  const rawCards = Array.isArray(db.contact_cards) && db.contact_cards.length > 0
+    ? db.contact_cards
+    : FALLBACK_CARDS;
   const visibleCards = rawCards.filter((c) => isItemEnabled(c.enabled));
 
-  const rawServices = Array.isArray(content.form_settings?.service_options)
-    ? content.form_settings.service_options
-    : [];
+  // Service options for the form dropdown
+  const rawServices = Array.isArray(db.form_settings?.service_options) && db.form_settings.service_options.length > 0
+    ? db.form_settings.service_options
+    : FALLBACK_SERVICE_OPTIONS;
   const serviceOptions = rawServices.filter((s) => isItemEnabled(s.enabled));
 
-  const rawActions = Array.isArray(content.quick_actions)
-    ? content.quick_actions
-    : Array.isArray(content.quick_actions?.actions)
-    ? content.quick_actions.actions
-    : [];
+  // Quick actions
+  const rawActions = Array.isArray(db.quick_actions) && db.quick_actions.length > 0
+    ? db.quick_actions
+    : Array.isArray(db.quick_actions?.actions) && db.quick_actions.actions.length > 0
+      ? db.quick_actions.actions
+      : FALLBACK_QUICK_ACTIONS;
   const visibleActions = rawActions.filter((a) => isItemEnabled(a.enabled));
 
-  const rawFaqs = Array.isArray(content.faqs)
-    ? content.faqs
-    : Array.isArray(content.faqs?.items)
-    ? content.faqs.items
-    : [];
+  // FAQs
+  const rawFaqs = Array.isArray(db.faqs) && db.faqs.length > 0
+    ? db.faqs
+    : Array.isArray(db.faqs?.items) && db.faqs.items.length > 0
+      ? db.faqs.items
+      : FALLBACK_FAQS;
   const visibleFaqs = rawFaqs.filter((f) => isItemEnabled(f.enabled));
 
-  const showHero = isItemEnabled(content.hero?.enabled);
-  const showCards = visibleCards.length > 0;
-  const showFormSection =
-    isItemEnabled(content.form_settings?.enabled) ||
-    isItemEnabled(content.office_info?.enabled) ||
-    visibleActions.length > 0;
-  const showMapSection = isItemEnabled(content.map?.enabled);
-  const showFaqSection = isItemEnabled(content.faqs?.enabled !== false) && visibleFaqs.length > 0;
-  const showFinalCta = isItemEnabled(content.final_cta?.enabled);
+  // Section visibility â€” default to true when DB has no data
+  const showHero        = !db.hero || isItemEnabled(db.hero?.enabled);
+  const showCards       = visibleCards.length > 0;
+  const showFormSection = !db.form_settings || isItemEnabled(db.form_settings?.enabled) ||
+                          isItemEnabled(db.office_info?.enabled) || visibleActions.length > 0;
+  const showMapSection  = isItemEnabled(db.map?.enabled) && !!db.map?.embed_url;
+  const showFaqSection  = visibleFaqs.length > 0;
+  const showFinalCta    = !db.final_cta || isItemEnabled(db.final_cta?.enabled);
 
-  // Hero fields
-  const heroTag = content.hero?.tag || content.hero?.tagline || "";
-  const heroTitle = content.hero?.title || content.hero?.title_line1 || "";
-  const heroDesc = content.hero?.subtitle || content.hero?.description || "";
-  const heroBg = content.hero?.bg_image || content.hero?.bg_image_url || "";
-  const heroButtons = Array.isArray(content.hero?.buttons)
-    ? content.hero.buttons.filter((b) => isItemEnabled(b.enabled))
+  // Hero fields â€” with fallbacks
+  const heroTag    = db.hero?.tag || db.hero?.tagline || "Get In Touch";
+  const heroTitle  = db.hero?.title || db.hero?.title_line1 || "Let's Build Something Together";
+  const heroDesc   = db.hero?.subtitle || db.hero?.description || "Whether you're planning a new project or have questions about our services, we're here to understand your requirements.";
+  const heroBg     = db.hero?.bg_image || db.hero?.bg_image_url || FALLBACK_HERO_IMAGE;
+  const heroButtons = Array.isArray(db.hero?.buttons)
+    ? db.hero.buttons.filter((b) => isItemEnabled(b.enabled))
     : [];
+
+  // Office info â€” with image fallback
+  const officeImage = db.office_info?.image_url || db.office_info?.image || FALLBACK_OFFICE_IMAGE;
+  const officeBadge   = db.office_info?.badge || db.office_info?.badge_text || "Saffpoll";
+  const officeHeading = db.office_info?.heading || db.office_info?.city_heading || "Jasola Vihar, New Delhi";
+  const officeAddress = Array.isArray(db.office_info?.address_lines)
+    ? db.office_info.address_lines.join(", ")
+    : (db.office_info?.address_val || "144, Pocket 1 Street, Pocket 1, Jasola Vihar, New Delhi, India");
+  const officePhones  = Array.isArray(db.office_info?.phones) && db.office_info.phones.length > 0
+    ? db.office_info.phones
+    : ["+91 98104 64083", "+91 85959 64083"];
+  const officeEmail   = db.office_info?.email || db.office_info?.email_val || "firoz@saffpoll.com";
 
   return (
     <main className="overflow-hidden bg-white font-['DM_Sans'] text-[#111827]">
@@ -423,11 +472,10 @@ export default function ContactUs() {
                         <a
                           key={btn.id || bIdx}
                           href={btn.link || btn.href || "#"}
-                          className={`inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold transition-all duration-300 hover:-translate-y-1 ${
-                            isOutline
+                          className={`inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold transition-all duration-300 hover:-translate-y-1 ${isOutline
                               ? "border border-white/35 bg-white/5 text-white backdrop-blur-sm hover:border-[#CF974A] hover:text-[#CF974A]"
                               : "bg-[#CF974A] text-white shadow-lg shadow-[#CF974A]/20 hover:bg-[#b9803d]"
-                          }`}
+                            }`}
                         >
                           {btn.text}
                           <BtnIcon size={18} />
@@ -684,114 +732,99 @@ export default function ContactUs() {
               <Reveal direction="right" delay={150}>
                 <div className="lg:pt-8 space-y-8">
                   {/* Office Card */}
-                  {isItemEnabled(content.office_info?.enabled) && (
+                  {(!db.office_info || isItemEnabled(db.office_info?.enabled)) && (
                     <div>
-                      {(content.office_info.tag || content.office_info.tagline) && (
+                      {(db.office_info?.tag || db.office_info?.tagline || "Our Office") && (
                         <SectionLabel>
-                          {content.office_info.tag || content.office_info.tagline}
+                          {db.office_info?.tag || db.office_info?.tagline || "Our Office"}
                         </SectionLabel>
                       )}
 
-                      {content.office_info.title && (
-                        <h3 className="text-[34px] font-semibold tracking-[-1px] text-[#111827]">
-                          {content.office_info.title}
-                        </h3>
-                      )}
+                      <h3 className="text-[34px] font-semibold tracking-[-1px] text-[#111827]">
+                        {db.office_info?.title || "Visit or Connect With Us"}
+                      </h3>
 
-                      {content.office_info.description && (
+                      {(db.office_info?.description || "Saffpoll is based in Jasola Vihar, New Delhi.") && (
                         <p className="mt-4 text-[15px] leading-7 text-slate-600">
-                          {content.office_info.description}
+                          {db.office_info?.description || "Saffpoll is based in Jasola Vihar, New Delhi. Reach out to discuss your construction, renovation, or commercial project requirements."}
                         </p>
                       )}
 
                       <div className="mt-8 overflow-hidden rounded-2xl bg-[#111827] shadow-[0_25px_60px_rgba(17,24,39,0.18)]">
-                        {(content.office_info.image_url || content.office_info.image) && (
-                          <div className="relative h-[260px] overflow-hidden">
-                            <img
-                              src={content.office_info.image_url || content.office_info.image}
-                              alt="Saffpoll office location"
-                              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-[#111827]/65" />
-                            <div className="absolute inset-0 flex items-end p-7">
-                              <div>
-                                {(content.office_info.badge || content.office_info.badge_text) && (
-                                  <span className="inline-flex rounded-full bg-[#CF974A] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                                    {content.office_info.badge || content.office_info.badge_text}
-                                  </span>
-                                )}
-                                {(content.office_info.heading || content.office_info.city_heading) && (
-                                  <h4 className="mt-3 text-2xl font-semibold text-white">
-                                    {content.office_info.heading || content.office_info.city_heading}
-                                  </h4>
-                                )}
-                              </div>
+                        {/* Always render image with fallback */}
+                        <div className="relative h-[260px] overflow-hidden">
+                          <img
+                            src={officeImage}
+                            alt="Saffpoll office location"
+                            className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-[#111827]/65" />
+                          <div className="absolute inset-0 flex items-end p-7">
+                            <div>
+                              <span className="inline-flex rounded-full bg-[#CF974A] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                                {officeBadge}
+                              </span>
+                              <h4 className="mt-3 text-2xl font-semibold text-white">
+                                {officeHeading}
+                              </h4>
                             </div>
                           </div>
-                        )}
+                        </div>
 
                         <div className="space-y-5 p-7">
-                          {(Array.isArray(content.office_info.address_lines)
-                            ? content.office_info.address_lines.join(", ")
-                            : content.office_info.address_val) && (
-                            <div className="flex gap-4">
-                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#CF974A]/15 text-[#CF974A]">
-                                <MapPin size={20} />
-                              </div>
-                              <div>
-                                <p className="text-xs font-bold uppercase tracking-wider text-[#CF974A]">
-                                  Address
-                                </p>
-                                <p className="mt-1 text-sm font-medium leading-6 text-slate-300">
-                                  {Array.isArray(content.office_info.address_lines)
-                                    ? content.office_info.address_lines.join(", ")
-                                    : content.office_info.address_val}
-                                </p>
-                              </div>
+                          {/* Address */}
+                          <div className="flex gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#CF974A]/15 text-[#CF974A]">
+                              <MapPin size={20} />
                             </div>
-                          )}
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-wider text-[#CF974A]">
+                                Address
+                              </p>
+                              <p className="mt-1 text-sm font-medium leading-6 text-slate-300">
+                                {officeAddress}
+                              </p>
+                            </div>
+                          </div>
 
-                          {Array.isArray(content.office_info.phones) &&
-                            content.office_info.phones.length > 0 && (
-                              <div className="flex gap-4">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#CF974A]/15 text-[#CF974A]">
-                                  <Phone size={20} />
-                                </div>
-                                <div>
-                                  <p className="text-xs font-bold uppercase tracking-wider text-[#CF974A]">
-                                    Phone
-                                  </p>
-                                  {content.office_info.phones.map((ph, pIdx) => (
-                                    <a
-                                      key={pIdx}
-                                      href={`tel:${ph.replace(/\s+/g, "")}`}
-                                      className="mt-1 block text-sm font-semibold text-white transition-colors hover:text-[#CF974A]"
-                                    >
-                                      {ph}
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          {(content.office_info.email || content.office_info.email_val) && (
-                            <div className="flex gap-4">
-                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#CF974A]/15 text-[#CF974A]">
-                                <Mail size={20} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-xs font-bold uppercase tracking-wider text-[#CF974A]">
-                                  Email
-                                </p>
+                          {/* Phone */}
+                          <div className="flex gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#CF974A]/15 text-[#CF974A]">
+                              <Phone size={20} />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-wider text-[#CF974A]">
+                                Phone
+                              </p>
+                              {officePhones.map((ph, pIdx) => (
                                 <a
-                                  href={`mailto:${content.office_info.email || content.office_info.email_val}`}
-                                  className="mt-1 block break-all text-sm font-semibold text-white transition-colors hover:text-[#CF974A]"
+                                  key={pIdx}
+                                  href={`tel:${String(ph).replace(/\s+/g, "")}`}
+                                  className="mt-1 block text-sm font-semibold text-white transition-colors hover:text-[#CF974A]"
                                 >
-                                  {content.office_info.email || content.office_info.email_val}
+                                  {ph}
                                 </a>
-                              </div>
+                              ))}
                             </div>
-                          )}
+                          </div>
+
+                          {/* Email */}
+                          <div className="flex gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#CF974A]/15 text-[#CF974A]">
+                              <Mail size={20} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold uppercase tracking-wider text-[#CF974A]">
+                                Email
+                              </p>
+                              <a
+                                href={`mailto:${officeEmail}`}
+                                className="mt-1 block break-all text-sm font-semibold text-white transition-colors hover:text-[#CF974A]"
+                              >
+                                {officeEmail}
+                              </a>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -965,11 +998,10 @@ export default function ContactUs() {
                         <a
                           key={btn.id || bIdx}
                           href={btn.link || btn.href || "#"}
-                          className={`inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-bold transition-all duration-300 hover:-translate-y-1 ${
-                            isOutline
+                          className={`inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-bold transition-all duration-300 hover:-translate-y-1 ${isOutline
                               ? "border border-white/25 bg-white/5 text-white hover:border-[#CF974A] hover:text-[#CF974A]"
                               : "bg-[#CF974A] text-white hover:bg-[#b9803d]"
-                          }`}
+                            }`}
                         >
                           {btn.text}
                           <BtnIcon size={18} />

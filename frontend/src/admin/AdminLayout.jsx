@@ -22,7 +22,10 @@ import {
   ExternalLink,
   Shield,
   Menu,
-  X
+  X,
+  Home,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 function AdminLayout() {
@@ -44,14 +47,23 @@ function AdminLayout() {
     return null;
   }
 
+  const [openDropdowns, setOpenDropdowns] = useState({});
+
   const navItems = [
     { label: 'Overview', path: '/admin', icon: LayoutDashboard, exact: true },
+    { label: 'Navbar Settings', path: '/admin/navbar', icon: Menu },
     { label: 'About Us CMS', path: '/admin/about-page', icon: Info },
-    { label: 'Hero Banner', path: '/admin/hero', icon: Sparkles },
-    { label: 'Core Values', path: '/admin/core-values', icon: ShieldCheck },
-    { label: 'How It Works', path: '/admin/how-it-works', icon: ListOrdered },
-    { label: 'Why Choose Us', path: '/admin/why-choose', icon: Award },
-    { label: 'Contact CTA Banner', path: '/admin/contact-cta', icon: Megaphone },
+    {
+      label: 'Home Page CMS',
+      icon: Home,
+      children: [
+        { label: 'Hero Banner', path: '/admin/hero', icon: Sparkles },
+        { label: 'Core Values', path: '/admin/core-values', icon: ShieldCheck },
+        { label: 'How It Works', path: '/admin/how-it-works', icon: ListOrdered },
+        { label: 'Why Choose Us', path: '/admin/why-choose', icon: Award },
+        { label: 'Contact CTA Banner', path: '/admin/contact-cta', icon: Megaphone }
+      ]
+    },
     { label: 'Contact Page CMS', path: '/admin/contact-page', icon: Phone },
 
     { label: 'Projects', path: '/admin/projects', icon: FolderKanban },
@@ -132,6 +144,52 @@ function AdminLayout() {
             Navigation
           </div>
           {navItems.map((item) => {
+            if (item.children) {
+              const isAnyChildActive = item.children.some(child => isActive(child));
+              const isOpen = openDropdowns[item.label] ?? isAnyChildActive;
+              const ParentIcon = item.icon;
+              return (
+                <div key={item.label} className="space-y-1">
+                  <button
+                    onClick={() => setOpenDropdowns(prev => ({ ...prev, [item.label]: !isOpen }))}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isAnyChildActive
+                        ? 'bg-amber-500/10 text-amber-400'
+                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <ParentIcon className={`w-4 h-4 ${isAnyChildActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                      <span>{item.label}</span>
+                    </div>
+                    {isOpen ? <ChevronDown className="w-4 h-4 opacity-70" /> : <ChevronRight className="w-4 h-4 opacity-70" />}
+                  </button>
+                  {isOpen && (
+                    <div className="pl-9 space-y-1 mt-1">
+                      {item.children.map(child => {
+                        const ChildIcon = child.icon;
+                        const active = isActive(child);
+                        return (
+                          <Link
+                            key={child.path}
+                            to={child.path}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              active
+                                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                            }`}
+                          >
+                            <ChildIcon className={`w-3.5 h-3.5 ${active ? 'text-amber-400' : 'text-slate-500'}`} />
+                            <span>{child.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             const Icon = item.icon;
             const active = isActive(item);
             return (
@@ -162,6 +220,53 @@ function AdminLayout() {
                 </button>
               </div>
               {navItems.map((item) => {
+                if (item.children) {
+                  const isAnyChildActive = item.children.some(child => isActive(child));
+                  const isOpen = openDropdowns[item.label] ?? isAnyChildActive;
+                  const ParentIcon = item.icon;
+                  return (
+                    <div key={item.label} className="space-y-1">
+                      <button
+                        onClick={() => setOpenDropdowns(prev => ({ ...prev, [item.label]: !isOpen }))}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                          isAnyChildActive
+                            ? 'bg-amber-500/10 text-amber-400'
+                            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <ParentIcon className={`w-4 h-4 ${isAnyChildActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                          <span>{item.label}</span>
+                        </div>
+                        {isOpen ? <ChevronDown className="w-4 h-4 opacity-70" /> : <ChevronRight className="w-4 h-4 opacity-70" />}
+                      </button>
+                      {isOpen && (
+                        <div className="pl-9 space-y-1 mt-1">
+                          {item.children.map(child => {
+                            const ChildIcon = child.icon;
+                            const active = isActive(child);
+                            return (
+                              <Link
+                                key={child.path}
+                                to={child.path}
+                                onClick={() => setMobileOpen(false)}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  active
+                                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                                }`}
+                              >
+                                <ChildIcon className={`w-3.5 h-3.5 ${active ? 'text-amber-400' : 'text-slate-500'}`} />
+                                <span>{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 const Icon = item.icon;
                 const active = isActive(item);
                 return (

@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getAll,
   getById,
+  getBySlug,
   createItem,
   updateItem,
   deleteItem,
@@ -21,13 +22,14 @@ import {
   getAboutPage,
   updateAboutPage
 } from '../controllers/crudController.js';
+import { getNavbar, updateNavbar } from '../controllers/navbarController.js';
 import { requireAuth } from '../middleware/auth.js';
 import { upload } from '../utils/upload.js';
 
 const router = express.Router();
 
 // Defined schema field filters for safe CRUD
-const projectFields = ['title', 'category', 'location', 'description', 'image_url', 'status', 'details_json'];
+const projectFields = ['title', 'slug', 'category', 'location', 'description', 'image_url', 'status', 'details_json'];
 const serviceFields = ['title', 'icon', 'description', 'details_json'];
 const teamFields = ['name', 'role', 'image_url', 'bio'];
 const insightFields = ['title', 'author', 'date', 'category', 'summary', 'content', 'image_url'];
@@ -65,6 +67,10 @@ router.put('/contact-page', requireAuth, updateContactPage);
 router.get('/about-page', getAboutPage);
 router.put('/about-page', requireAuth, updateAboutPage);
 
+// Navbar Settings Routes
+router.get('/navbar', getNavbar);
+router.put('/navbar', requireAuth, updateNavbar);
+
 // Media Upload endpoint for Admin
 router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
   if (!req.file) {
@@ -77,6 +83,7 @@ router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
 // Projects Routes
 router.get('/projects', getAll('projects'));
 router.get('/projects/:id', getById('projects'));
+router.get('/projects/slug/:slug', getBySlug('projects'));
 router.post('/projects', requireAuth, createItem('projects', projectFields));
 router.put('/projects/:id', requireAuth, updateItem('projects', projectFields));
 router.delete('/projects/:id', requireAuth, deleteItem('projects'));

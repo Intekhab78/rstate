@@ -13,6 +13,7 @@ import Project from "./pages/Project";
 import Services from "./pages/Services";
 import ContactUs from "./pages/ContactUs";
 import AdminApp from "./admin/AdminApp";
+import ProjectDetail from "./pages/ProjectDetail";
 
 // Scroll to top or scroll to target anchor hash on route change
 function ScrollToTop() {
@@ -58,6 +59,8 @@ function PublicLayout() {
         <Route path="/project" element={<Project />} />
         <Route path="/services" element={<Services />} />
         <Route path="/contactUs" element={<ContactUs />} />
+        <Route path="/project/:slug" element={<ProjectDetail />} />
+
       </Routes>
       <FooterSection />
     </>

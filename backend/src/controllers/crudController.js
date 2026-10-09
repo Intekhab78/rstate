@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import HeroContent from '../models/HeroContent.js';
 import CoreValues from '../models/CoreValues.js';
 import HowItWorks from '../models/HowItWorks.js';
@@ -42,7 +43,7 @@ export const getAll = (tableName) => async (req, res) => {
   }
 };
 
-// Generic helper for fetching one record by ID
+// Generic helper for fetching one record by ID or slug
 export const getById = (tableName) => async (req, res) => {
   try {
     const { id } = req.params;
@@ -50,7 +51,9 @@ export const getById = (tableName) => async (req, res) => {
     if (!Model) {
       return res.status(400).json({ success: false, message: `Invalid collection: ${tableName}` });
     }
-    const row = await Model.findById(id);
+    const isObjectId = mongoose.Types.ObjectId.isValid(id) && id.length === 24;
+    const query = isObjectId ? { _id: id } : { slug: id };
+    const row = await Model.findOne(query);
     if (!row) {
       return res.status(404).json({ success: false, message: `Item not found in ${tableName}.` });
     }
@@ -58,6 +61,25 @@ export const getById = (tableName) => async (req, res) => {
   } catch (error) {
     console.error(`Error fetching item from ${tableName}:`, error);
     res.status(500).json({ success: false, message: `Failed to retrieve item.` });
+  }
+};
+
+// Generic helper for fetching one record by slug
+export const getBySlug = (tableName) => async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const Model = modelMap[tableName];
+    if (!Model) {
+      return res.status(400).json({ success: false, message: `Invalid collection: ${tableName}` });
+    }
+    const row = await Model.findOne({ slug });
+    if (!row) {
+      return res.status(404).json({ success: false, message: `Item not found in ${tableName} with slug ${slug}.` });
+    }
+    res.json({ success: true, data: row });
+  } catch (error) {
+    console.error(`Error fetching item by slug from ${tableName}:`, error);
+    res.status(500).json({ success: false, message: `Failed to retrieve item by slug.` });
   }
 };
 
@@ -75,6 +97,11 @@ export const createItem = (tableName, allowedFields) => async (req, res) => {
         payload[field] = req.body[field];
       }
     });
+
+    if (payload.slug) {
+      const existing = await Model.findOneAndUpdate({ slug: payload.slug }, payload, { new: true, upsert: true });
+      return res.status(200).json({ success: true, message: 'Item saved successfully.', data: existing });
+    }
 
     const createdRecord = await Model.create(payload);
     res.status(201).json({ success: true, message: 'Item created successfully.', data: createdRecord });
@@ -100,14 +127,13 @@ export const updateItem = (tableName, allowedFields) => async (req, res) => {
       }
     });
 
-    const updatedRecord = await Model.findByIdAndUpdate(id, payload, { new: true });
-    if (!updatedRecord) {
-      return res.status(404).json({ success: false, message: 'Item not found.' });
-    }
+    const isObjectId = mongoose.Types.ObjectId.isValid(id) && id.length === 24;
+    const query = isObjectId ? { _id: id } : { slug: id };
+    const updatedRecord = await Model.findOneAndUpdate(query, payload, { new: true, upsert: true });
     res.json({ success: true, message: 'Item updated successfully.', data: updatedRecord });
   } catch (error) {
     console.error(`Error updating item in ${tableName}:`, error);
-    res.status(500).json({ success: false, message: 'Failed to update item.' });
+    res.status(500).json({ success: false, message: `Failed to update item.` });
   }
 };
 
@@ -120,7 +146,9 @@ export const deleteItem = (tableName) => async (req, res) => {
       return res.status(400).json({ success: false, message: `Invalid collection: ${tableName}` });
     }
 
-    const existing = await Model.findByIdAndDelete(id);
+    const isObjectId = mongoose.Types.ObjectId.isValid(id) && id.length === 24;
+    const query = isObjectId ? { _id: id } : { slug: id };
+    const existing = await Model.findOneAndDelete(query);
     if (!existing) {
       return res.status(404).json({ success: false, message: 'Item not found.' });
     }

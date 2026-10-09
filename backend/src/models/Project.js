@@ -2,13 +2,14 @@ import mongoose from 'mongoose';
 
 const projectSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    category: { type: String },
-    location: { type: String },
-    description: { type: String },
-    image_url: { type: String },
+    title: { type: String, default: '' },
+    slug: { type: String, unique: true },
+    category: { type: String, default: '' },
+    location: { type: String, default: '' },
+    description: { type: String, default: '' },
+    image_url: { type: String, default: '' },
     status: { type: String, default: 'Completed' },
-    details_json: { type: String }
+    details_json: { type: String, default: '{}' }
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );

@@ -10,7 +10,9 @@ import AdminWhyChoose from './pages/AdminWhyChoose';
 import AdminContactCTA from './pages/AdminContactCTA';
 import AdminContactPage from './pages/AdminContactPage';
 import AdminAboutPage from './pages/AdminAboutPage';
+import AdminNavbarPage from './pages/AdminNavbarPage';
 import AdminProjects from './pages/AdminProjects';
+import AdminProjectEditor from './pages/AdminProjectEditor';
 import AdminEnquiries from './pages/AdminEnquiries';
 import AdminGenericManager from './components/AdminGenericManager';
 import { Wrench, Users, FileText, Newspaper, Quote, Briefcase, Phone } from 'lucide-react';
@@ -23,6 +25,7 @@ function AdminApp() {
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="about-page" element={<AdminAboutPage />} />
+        <Route path="navbar" element={<AdminNavbarPage />} />
         <Route path="hero" element={<AdminHero />} />
         <Route path="core-values" element={<AdminCoreValues />} />
         <Route path="how-it-works" element={<AdminHowItWorks />} />
@@ -30,6 +33,7 @@ function AdminApp() {
         <Route path="contact-cta" element={<AdminContactCTA />} />
         <Route path="contact-page" element={<AdminContactPage />} />
         <Route path="projects" element={<AdminProjects />} />
+        <Route path="projects/edit/:id" element={<AdminProjectEditor />} />
         <Route path="enquiries" element={<AdminEnquiries />} />
 
         <Route

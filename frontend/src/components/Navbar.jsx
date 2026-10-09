@@ -1,21 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Phone, Menu, X } from "lucide-react";
+import { Phone, Menu, X, ChevronDown } from "lucide-react";
+
+import { apiFetch } from "../utils/api.js";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
-
-  const navItems = [
+  const [navItems, setNavItems] = useState([
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
-    { name: "Projects", href: "/project" },
+    { 
+      name: "Projects", 
+      href: "/project",
+      dropdown: [
+        { name: "SaffPoll Residences", href: "/project/saffpoll-residences" }
+      ]
+    },
     { name: "Services", href: "/services" },
-    // { name: "Venture Developments", href: "/#ventures" },
     { name: "Contact", href: "/contactUs" },
-  ];
+  ]);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchNavbar = async () => {
+      try {
+        const [navResRaw, projResRaw] = await Promise.all([
+          apiFetch("/navbar").catch(() => null),
+          apiFetch("/projects").catch(() => null)
+        ]);
+        const navRes = navResRaw ? await navResRaw.json().catch(() => null) : null;
+        const projRes = projResRaw ? await projResRaw.json().catch(() => null) : null;
+        
+        if (navRes && navRes.items && navRes.items.length > 0) {
+          const items = navRes.items.map(item => {
+            if (item.type === 'dynamic_projects') {
+              const projectsArray = projRes?.data || [];
+              const projDropdown = projectsArray.map(p => ({
+                name: p.title,
+                href: `/project/${p.slug || p.id}`
+              }));
+              if (!projDropdown.some(p => p.href === "/project/saffpoll-residences")) {
+                projDropdown.unshift({ name: "SaffPoll Residences", href: "/project/saffpoll-residences" });
+              }
+              return { ...item, dropdown: projDropdown };
+            }
+            return item;
+          });
+          setNavItems(items);
+        }
+      } catch (err) {
+        console.error("Failed to load navbar data", err);
+      }
+    };
+    fetchNavbar();
+  }, []);
+
 
   const isItemActive = (href) => {
+    if (!href) return false;
     if (href === "/") return location.pathname === "/";
     if (href === "/about") return location.pathname === "/about" || location.pathname === "/about-us";
     if (href.startsWith("/#")) return location.pathname === "/" && location.hash === href.replace("/", "");
@@ -42,6 +85,45 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-6 xl:gap-11">
           {navItems.map((item) => {
             const active = isItemActive(item.href);
+
+            if (item.dropdown && item.dropdown.length > 0) {
+              return (
+                <div key={item.name} className="group relative">
+                  <Link
+                    to={item.href}
+                    className={`flex items-center gap-1 whitespace-nowrap text-[15px] xl:text-[17px] font-medium transition-colors duration-300 ${
+                      active ? "text-[#CF974A]" : "text-gray-800 hover:text-[#CF974A]"
+                    }`}
+                  >
+                    {item.name}
+                    <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
+
+                    {/* Active/hover underline */}
+                    <span
+                      className={`absolute -bottom-2 left-0 h-[2px] bg-[#CF974A] transition-all duration-300 ${
+                        active ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+
+                  {/* Dropdown Menu */}
+                  <div className="absolute left-0 top-full hidden pt-5 group-hover:block w-64">
+                    <div className="rounded-xl bg-white p-3 shadow-[0_10px_40px_rgba(0,0,0,0.1)] ring-1 ring-black/5">
+                      {item.dropdown.map((dropItem) => (
+                        <Link
+                          key={dropItem.name}
+                          to={dropItem.href}
+                          className="block rounded-lg px-4 py-3 text-[15px] font-semibold text-gray-700 transition-colors hover:bg-[#CF974A]/10 hover:text-[#CF974A]"
+                        >
+                          {dropItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.name}
@@ -102,6 +184,40 @@ const Navbar = () => {
           <div className="flex flex-col gap-4">
             {navItems.map((item) => {
               const active = isItemActive(item.href);
+
+              if (item.dropdown && item.dropdown.length > 0) {
+                return (
+                  <div key={item.name} className="flex flex-col gap-3">
+                    <Link
+                      to={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`text-lg font-medium transition-colors ${active
+                          ? "text-[#CF974A]"
+                          : "text-gray-800 hover:text-[#CF974A]"
+                        }`}
+                    >
+                      {item.name}
+                    </Link>
+                    <div className="flex flex-col gap-3 pl-4 border-l-2 border-gray-100 ml-2">
+                      {item.dropdown.map(dropItem => (
+                        <Link
+                          key={dropItem.name}
+                          to={dropItem.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`text-[15px] font-semibold transition-colors ${
+                            isItemActive(dropItem.href)
+                              ? "text-[#CF974A]"
+                              : "text-gray-600 hover:text-[#CF974A]"
+                          }`}
+                        >
+                          {dropItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.name}

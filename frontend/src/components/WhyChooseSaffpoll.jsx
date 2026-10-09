@@ -632,11 +632,10 @@ export default function WhyChooseSaffpoll() {
                   return (
                     <div
                       key={val.id || vIdx}
-                      className={`group flex gap-4 ${
-                        vIdx > 0
+                      className={`group flex gap-4 ${vIdx > 0
                           ? "border-t border-[#e4e1dc] pt-6 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0"
                           : ""
-                      }`}
+                        }`}
                     >
                       <div
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
