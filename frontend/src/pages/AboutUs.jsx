@@ -1,5 +1,6 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../utils/api.js";
+import SEO from "../components/SEO.jsx";
 import {
     ArrowDownRight,
     ArrowRight,
@@ -249,6 +250,18 @@ export default function AboutUs() {
 
     return (
         <main className="overflow-hidden bg-white">
+            <SEO
+                title="About Us | SaffPoll - Engineering, Vision & Excellence"
+                description={hero.subheading || "Learn about SaffPoll's commitment to quality engineering, thoughtful planning, and enduring construction across all development sectors."}
+                canonicalUrl="https://rstate.jtsmiddleeast.com/about"
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@type": "AboutPage",
+                    "name": "About SaffPoll Developments",
+                    "description": hero.subheading || "SaffPoll delivers contemporary architectural excellence and enduring quality.",
+                    "url": "https://rstate.jtsmiddleeast.com/about"
+                }}
+            />
             {/* Page Animations */}
             <style>{`
         .about-reveal {

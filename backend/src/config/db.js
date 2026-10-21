@@ -226,7 +226,9 @@ export const initDb = async () => {
         },
         contact_cards: [
           { id: 'card_phone', enabled: true, icon: 'Phone', label: 'Phone', lines: ['+91 98104 64083', '+91 85959 64083'], href: 'tel:+919810464083' },
-          { id: 'card_email', enabled: true, icon: 'Mail', label: 'Email', lines: ['firoz@saffpoll.com'], href: 'mailto:firoz@saffpoll.com' }
+          { id: 'card_email', enabled: true, icon: 'Mail', label: 'Email', lines: ['firoz@saffpoll.com'], href: 'mailto:firoz@saffpoll.com' },
+          { id: 'card_address', enabled: true, icon: 'MapPin', label: 'Address', lines: ['144, Pocket 1 Street, Pocket 1,', 'Jasola Vihar, New Delhi, Delhi, India'], href: '' },
+          { id: 'card_hours', enabled: true, icon: 'Clock3', label: 'Working Hours', lines: ['Mon – Fri: 09:00 AM – 05:00 PM', 'Saturday & Sunday: Closed'], href: '' }
         ]
       });
       console.log('[DB Seed] Initial Contact Page content created.');

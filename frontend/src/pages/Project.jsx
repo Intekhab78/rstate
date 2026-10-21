@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import SEO from "../components/SEO.jsx";
 import { apiFetch } from "../utils/api.js";
 import {
   ArrowUpRight,
@@ -136,7 +138,9 @@ function ProjectHero() {
       <div className="absolute inset-0">
         <img
           src={images.hero}
-          alt="Saffpoll construction project"
+          alt="Saffpoll premier construction and real estate project"
+          fetchPriority="high"
+          decoding="async"
           className="h-full w-full object-cover"
         />
 
@@ -386,14 +390,21 @@ function ProjectCard({ project }) {
     project.image ||
     "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1600&q=90";
 
-  return (
-    <article className="group relative overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.07)]">
+  const targetSlug =
+    project.slug ||
+    project._id ||
+    (project.id && !String(project.id).startsWith("fb-") ? project.id : null);
+  const targetUrl = targetSlug ? `/project/${targetSlug}` : null;
+
+  const content = (
+    <article className="group relative overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.07)] transition-all duration-300 hover:shadow-xl">
       {/* Image */}
       <div className="relative aspect-[1.12/1] overflow-hidden">
         <img
           src={projectImg}
-          alt={project.title}
+          alt={project.title ? `${project.title} - SaffPoll Real Estate & Construction` : "SaffPoll Project"}
           loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
 
@@ -441,6 +452,20 @@ function ProjectCard({ project }) {
       <div className="h-[4px] w-0 bg-[#CF974A] transition-all duration-500 group-hover:w-full" />
     </article>
   );
+
+  if (targetUrl) {
+    return (
+      <Link
+        to={targetUrl}
+        className="block group focus:outline-none focus:ring-2 focus:ring-[#CF974A] rounded-[18px]"
+        aria-label={`View project details for ${project.title}`}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 /* =========================================================
@@ -762,8 +787,45 @@ export default function Project() {
     });
   }, []);
 
+  const projectCollectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Our Projects & Portfolio | SaffPoll Developments",
+    description:
+      "Explore our portfolio of premier residential, commercial, industrial, and urban development projects by SaffPoll.",
+    url: "https://rstate.jtsmiddleeast.com/project",
+    publisher: {
+      "@type": "Organization",
+      name: "SaffPoll Developments",
+      url: "https://rstate.jtsmiddleeast.com",
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://rstate.jtsmiddleeast.com/",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Projects",
+          item: "https://rstate.jtsmiddleeast.com/project",
+        },
+      ],
+    },
+  };
+
   return (
     <main className="overflow-hidden bg-white font-['DM_Sans',sans-serif]">
+      <SEO
+        title="Our Projects & Portfolio | SaffPoll Developments"
+        description="Explore our portfolio of premier residential, commercial, industrial, and urban development projects. Discover award-winning architecture and master planning by SaffPoll."
+        canonicalUrl="https://rstate.jtsmiddleeast.com/project"
+        structuredData={projectCollectionSchema}
+      />
       <ProjectHero />
 
       <ProjectsGallery />

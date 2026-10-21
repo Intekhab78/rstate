@@ -9,6 +9,18 @@ const projectSchema = new mongoose.Schema(
     description: { type: String, default: '' },
     image_url: { type: String, default: '' },
     status: { type: String, default: 'Completed' },
+    design_template: { type: String, default: 'design1' },
+    seo: {
+      title: { type: String, default: '' },
+      description: { type: String, default: '' },
+      keywords: { type: String, default: '' },
+      canonical_url: { type: String, default: '' },
+      og_image: { type: String, default: '' },
+      image_alt: { type: String, default: '' },
+      noindex: { type: Boolean, default: false },
+      nofollow: { type: Boolean, default: false },
+      schema_type: { type: String, default: 'Accommodation' }
+    },
     details_json: { type: String, default: '{}' }
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }

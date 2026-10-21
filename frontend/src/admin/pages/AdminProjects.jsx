@@ -7,6 +7,18 @@ function AdminProjects() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const defaultSeo = {
+    title: '',
+    description: '',
+    keywords: '',
+    canonical_url: '',
+    og_image: '',
+    image_alt: '',
+    noindex: false,
+    nofollow: false,
+    schema_type: 'Accommodation'
+  };
+
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -14,8 +26,11 @@ function AdminProjects() {
     location: '',
     description: '',
     image_url: '',
-    status: 'Completed'
+    status: 'Completed',
+    design_template: 'design1',
+    seo: { ...defaultSeo }
   });
+  const [showSeoFields, setShowSeoFields] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -70,13 +85,37 @@ function AdminProjects() {
       location: '',
       description: '',
       image_url: '',
-      status: 'Completed'
+      status: 'Completed',
+      design_template: 'design1',
+      seo: { ...defaultSeo }
     });
+    setShowSeoFields(false);
     setShowModal(true);
+  };
+
+  const getProjectDesign = (proj) => {
+    if (proj?.design_template) return proj.design_template;
+    if (proj?.details_json) {
+      try {
+        const d = JSON.parse(proj.details_json);
+        if (d.design_template || d.template) return d.design_template || d.template;
+      } catch (e) {}
+    }
+    return 'design1';
   };
 
   const openEditModal = (project) => {
     setEditingId(project.id);
+    let projectSeo = { ...defaultSeo };
+    if (project.seo && typeof project.seo === 'object') {
+      projectSeo = { ...defaultSeo, ...project.seo };
+    } else if (project.details_json) {
+      try {
+        const d = JSON.parse(project.details_json);
+        if (d.seo) projectSeo = { ...defaultSeo, ...d.seo };
+      } catch (e) {}
+    }
+
     setFormData({
       title: project.title || '',
       slug: project.slug || '',
@@ -84,8 +123,11 @@ function AdminProjects() {
       location: project.location || '',
       description: project.description || '',
       image_url: project.image_url || '',
-      status: project.status || 'Completed'
+      status: project.status || 'Completed',
+      design_template: getProjectDesign(project),
+      seo: projectSeo
     });
+    setShowSeoFields(false);
     setShowModal(true);
   };
 
@@ -170,6 +212,7 @@ function AdminProjects() {
                   <th className="p-4">Category</th>
                   <th className="p-4">Location</th>
                   <th className="p-4">Status</th>
+                  <th className="p-4">Design Layout</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -204,6 +247,17 @@ function AdminProjects() {
                         {proj.status || 'Completed'}
                       </span>
                     </td>
+                    <td className="p-4">
+                      {getProjectDesign(proj) === 'design2' ? (
+                        <span className="bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded text-xs font-semibold inline-flex items-center gap-1">
+                          Design 2
+                        </span>
+                      ) : (
+                        <span className="bg-blue-500/15 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded text-xs font-semibold inline-flex items-center gap-1">
+                          Design 1
+                        </span>
+                      )}
+                    </td>
                     <td className="p-4 text-right flex items-center justify-end gap-2">
                       <a
                         href={`/admin/projects/edit/${proj.slug || proj.id}`}
@@ -235,7 +289,7 @@ function AdminProjects() {
       {/* Modal Dialog for Add / Edit */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-lg font-bold text-white">
                 {editingId ? 'Edit Project' : 'Create New Project'}
@@ -245,7 +299,7 @@ function AdminProjects() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Project Title</label>
@@ -295,6 +349,23 @@ function AdminProjects() {
               </div>
 
               <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Design Template Selection
+                </label>
+                <select
+                  value={formData.design_template}
+                  onChange={(e) => setFormData({ ...formData, design_template: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                >
+                  <option value="design1">Design 1 (Classic Architectural Detail)</option>
+                  <option value="design2">Design 2 (Editorial Luxury Residences)</option>
+                </select>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Choose which layout is rendered when visitors view this project's details.
+                </p>
+              </div>
+
+              <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">Image URL</label>
                 <input
                   type="text"
@@ -314,6 +385,126 @@ function AdminProjects() {
                   placeholder="Detailed project description..."
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                 />
+              </div>
+
+              {/* SEO & Search Engine Optimization Section */}
+              <div className="border border-slate-800 rounded-xl bg-slate-950/50 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-amber-400">SEO & Social Sharing Metadata</h4>
+                    <p className="text-xs text-slate-400">Configure title, description, and indexing for search engines</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowSeoFields(!showSeoFields)}
+                    className="text-xs text-amber-400 hover:underline cursor-pointer font-medium"
+                  >
+                    {showSeoFields ? 'Collapse SEO' : 'Expand SEO Settings'}
+                  </button>
+                </div>
+
+                {showSeoFields && (
+                  <div className="space-y-3 pt-2 border-t border-slate-800/80">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-xs font-semibold text-slate-300">Custom SEO Title</label>
+                        <span className="text-[11px] text-slate-500">{formData.seo?.title?.length || 0} / 60 recommended</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={formData.seo?.title || ''}
+                        onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, title: e.target.value } })}
+                        placeholder={formData.title ? `${formData.title} | SaffPoll Developments` : 'e.g. SaffPoll Residences | Luxury 2, 3 & 4 BHK in New Delhi'}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-xs font-semibold text-slate-300">Meta Description</label>
+                        <span className="text-[11px] text-slate-500">{formData.seo?.description?.length || 0} / 160 recommended</span>
+                      </div>
+                      <textarea
+                        rows="2"
+                        value={formData.seo?.description || ''}
+                        onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, description: e.target.value } })}
+                        placeholder={formData.description ? formData.description.slice(0, 155) : 'Brief description for Google search snippets...'}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">SEO Keywords</label>
+                        <input
+                          type="text"
+                          value={formData.seo?.keywords || ''}
+                          onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, keywords: e.target.value } })}
+                          placeholder="comma, separated, keywords"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">Schema Type</label>
+                        <select
+                          value={formData.seo?.schema_type || 'Accommodation'}
+                          onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, schema_type: e.target.value } })}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                        >
+                          <option value="Accommodation">Accommodation</option>
+                          <option value="ApartmentComplex">Apartment Complex</option>
+                          <option value="RealEstateListing">Real Estate Listing</option>
+                          <option value="CreativeWork">Creative Work</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">Canonical URL Override</label>
+                        <input
+                          type="text"
+                          value={formData.seo?.canonical_url || ''}
+                          onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, canonical_url: e.target.value } })}
+                          placeholder={`https://rstate.jtsmiddleeast.com/project/${formData.slug || 'slug'}`}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">Social Image Alt Text</label>
+                        <input
+                          type="text"
+                          value={formData.seo?.image_alt || ''}
+                          onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, image_alt: e.target.value } })}
+                          placeholder="Descriptive alt text for image"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 pt-1">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={formData.seo?.noindex || false}
+                          onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, noindex: e.target.checked } })}
+                          className="rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500"
+                        />
+                        <span>Noindex (Hide from Google & search engines)</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={formData.seo?.nofollow || false}
+                          onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, nofollow: e.target.checked } })}
+                          className="rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500"
+                        />
+                        <span>Nofollow (Tell crawlers not to follow links)</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-3 pt-2">

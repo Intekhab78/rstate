@@ -3,6 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
 import { apiFetch } from "../utils/api.js";
 import defaultProjectData from "./projectData.jsx";
+import Design2 from "./Design2.jsx";
+import SEO from "../components/SEO.jsx";
+import { buildProjectSEO } from "../utils/seoHelpers.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -89,6 +92,8 @@ function ProjectDetail() {
                         floorPlans: normalizedFloorPlans,
                         specifications: details.specifications !== undefined ? details.specifications : (defaultProjectData.specifications || []),
                         gallery: normalizedGallery,
+                        design_template: baseProject.design_template || details.design_template || details.template || "design1",
+                        seo: baseProject.seo || details.seo || {},
                         construction: details.construction !== undefined ? details.construction : defaultProjectData.construction,
                         locationDetails: details.locationDetails !== undefined ? details.locationDetails : defaultProjectData.locationDetails,
                         toggles: {
@@ -151,6 +156,12 @@ function ProjectDetail() {
     if (!project) {
         return (
             <main className="min-h-screen bg-[#07101f] text-white">
+                <SEO
+                    title="Project Not Found (404) | SaffPoll Developments"
+                    description="The requested development project could not be found or is no longer available."
+                    noindex={true}
+                    nofollow={true}
+                />
                 <section className="flex min-h-[75vh] items-center justify-center px-6">
                     <div className="max-w-xl text-center">
                         <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-[#CF974A]">
@@ -179,6 +190,14 @@ function ProjectDetail() {
         );
     }
 
+    const seoProps = buildProjectSEO(project, currentSlug);
+
+    // Dynamic Design Template Dispatcher
+    const activeDesign = project.design_template || project.template || "design1";
+    if (activeDesign === "design2") {
+        return <Design2 project={project} />;
+    }
+
     const openImage = (image) => {
         setSelectedImage(image);
     };
@@ -189,6 +208,7 @@ function ProjectDetail() {
 
     return (
         <main className="bg-white text-[#0b1424]">
+            {seoProps && <SEO {...seoProps} />}
             {/* =====================================================
           HERO / BASIC DETAILS
       ====================================================== */}
