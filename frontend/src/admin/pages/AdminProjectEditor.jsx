@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/adminApi';
 import defaultProjectData from '../../pages/projectData.jsx';
-import { Save, ArrowLeft, Check, LayoutDashboard, Image as ImageIcon, List, Plus, Trash2, GripVertical, Building2, Home, Hammer, MapPin } from 'lucide-react';
+import { Save, ArrowLeft, Check, LayoutDashboard, Image as ImageIcon, List, Plus, Trash2, GripVertical, Building2, Home, Hammer, MapPin, Globe, Search, Eye } from 'lucide-react';
 
 function SectionToggle({ checked, onChange }) {
   return (
@@ -39,6 +39,7 @@ function AdminProjectEditor() {
     category: '',
     location: '',
     status: '',
+    design_template: 'design1',
     startingPrice: '₹XX Lakh',
     heroImage: '',
     overview: '',
@@ -58,6 +59,17 @@ function AdminProjectEditor() {
       title: 'Connected to the city. Designed for modern living.',
       description: '',
       highlights: []
+    },
+    seo: {
+      title: '',
+      description: '',
+      keywords: '',
+      canonical_url: '',
+      og_image: '',
+      image_alt: '',
+      noindex: false,
+      nofollow: false,
+      schema_type: 'Accommodation'
     },
     faqs: []
   });
@@ -141,6 +153,7 @@ function AdminProjectEditor() {
           category: projectRecord.category !== undefined ? projectRecord.category : (defaultProjectData.category || ''),
           location: projectRecord.location !== undefined ? projectRecord.location : (defaultProjectData.location || ''),
           status: projectRecord.status !== undefined ? projectRecord.status : (defaultProjectData.status || ''),
+          design_template: projectRecord.design_template || details.design_template || details.template || 'design1',
           startingPrice: details.startingPrice !== undefined ? details.startingPrice : (defaultProjectData.startingPrice || ''),
           heroImage: projectRecord.image_url !== undefined ? projectRecord.image_url : (details.heroImage || defaultProjectData.heroImage || ''),
           overview: projectRecord.description !== undefined ? projectRecord.description : (details.overview || defaultProjectData.overview || ''),
@@ -165,7 +178,18 @@ function AdminProjectEditor() {
             title: 'Connected to the city. Designed for modern living.',
             description: '',
             highlights: []
-          })
+          }),
+          seo: {
+            title: projectRecord.seo?.title || details.seo?.title || '',
+            description: projectRecord.seo?.description || details.seo?.description || '',
+            keywords: projectRecord.seo?.keywords || details.seo?.keywords || '',
+            canonical_url: projectRecord.seo?.canonical_url || details.seo?.canonical_url || '',
+            og_image: projectRecord.seo?.og_image || details.seo?.og_image || '',
+            image_alt: projectRecord.seo?.image_alt || details.seo?.image_alt || '',
+            noindex: projectRecord.seo?.noindex ?? details.seo?.noindex ?? false,
+            nofollow: projectRecord.seo?.nofollow ?? details.seo?.nofollow ?? false,
+            schema_type: projectRecord.seo?.schema_type || details.seo?.schema_type || 'Accommodation'
+          }
         });
 
         if (details.toggles) {
@@ -190,6 +214,9 @@ function AdminProjectEditor() {
 
       const finalDetails = {
         ...data,
+        design_template: data.design_template || 'design1',
+        template: data.design_template || 'design1',
+        seo: data.seo,
         floorPlans: fpObj,
         toggles
       };
@@ -203,6 +230,8 @@ function AdminProjectEditor() {
         description: data.overview !== undefined ? data.overview : '',
         image_url: data.heroImage !== undefined ? data.heroImage : '',
         status: data.status !== undefined ? data.status : '',
+        design_template: data.design_template || 'design1',
+        seo: data.seo,
         details_json: finalJsonString
       };
 
@@ -234,6 +263,16 @@ function AdminProjectEditor() {
 
   const handleDataChange = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSeoChange = (field, value) => {
+    setData(prev => ({
+      ...prev,
+      seo: {
+        ...(prev.seo || {}),
+        [field]: value
+      }
+    }));
   };
 
   // Helper functions for array fields
@@ -309,6 +348,14 @@ function AdminProjectEditor() {
         >
           <LayoutDashboard className="w-4 h-4" /> Enable/Disable Sections
         </button>
+        <button
+          onClick={() => setActiveTab('seo')}
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'seo' ? 'border-amber-400 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Globe className="w-4 h-4" /> SEO & Social Metadata
+        </button>
       </div>
 
       {/* Content Editor Tab */}
@@ -327,6 +374,38 @@ function AdminProjectEditor() {
               />
             </div>
             
+            <div className="bg-slate-950/70 border border-amber-500/30 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <label className="block text-sm font-bold text-amber-400">
+                  Project Details Page Design Template
+                </label>
+                <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  Choose which layout design visitors see when viewing this project. The page will dynamically render the selected layout with all content entered below.
+                </p>
+              </div>
+              <div className="w-full md:w-auto min-w-[280px]">
+                <select
+                  value={data.design_template || 'design1'}
+                  onChange={(e) => handleDataChange('design_template', e.target.value)}
+                  className="w-full bg-slate-900 border border-amber-500/50 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 font-semibold cursor-pointer shadow-md"
+                >
+                  <option value="design1">Design 1 (Classic Architectural Detail - ProjectDetail.jsx)</option>
+                  <option value="design2">Design 2 (Editorial Luxury Residences - Design2.jsx)</option>
+                </select>
+                <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Selected: <strong className="text-amber-400">{data.design_template === 'design2' ? 'Design 2 (Editorial)' : 'Design 1 (Classic)'}</strong></span>
+                  <a 
+                    href={`/project/${project?.slug || id}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-amber-400 hover:underline"
+                  >
+                    View Live Page ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Project Name / Title</label>
@@ -1113,6 +1192,217 @@ function AdminProjectEditor() {
                   </label>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SEO & Social Metadata Tab */}
+      {activeTab === 'seo' && (
+        <div className="space-y-8">
+          {/* Live Search & Social Previews */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Google SERP Preview */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+                <Search className="w-4 h-4" /> Google Search Result Preview
+              </div>
+              <div className="bg-white rounded-lg p-4 font-sans text-left shadow-sm">
+                <div className="flex items-center gap-2 text-xs text-slate-600 mb-1">
+                  <span className="w-4 h-4 rounded-full bg-amber-500/20 text-[#A8732E] flex items-center justify-center text-[10px] font-bold">S</span>
+                  <span className="truncate">https://rstate.jtsmiddleeast.com › project › {project?.slug || id}</span>
+                </div>
+                <h3 className="text-[#1a0dab] hover:underline text-lg font-medium leading-tight cursor-pointer truncate">
+                  {data.seo?.title?.trim() || `${data.title || 'Project'} | ${data.category || 'Development'} - SaffPoll`}
+                </h3>
+                <p className="text-[#4d5156] text-xs leading-normal mt-1 line-clamp-2">
+                  {data.seo?.description?.trim() || data.overview?.slice(0, 155) || 'Discover modern architecture, practical residential layouts, and premium enduring value with SaffPoll Developments.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Social Card Preview */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+                <Globe className="w-4 h-4" /> Social Share (Facebook / WhatsApp / X) Card
+              </div>
+              <div className="bg-slate-950 border border-slate-800 rounded-lg overflow-hidden shadow-sm">
+                <div className="aspect-[1.91/1] bg-slate-900 relative overflow-hidden">
+                  <img
+                    src={data.seo?.og_image || data.heroImage || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85'}
+                    alt="Social preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-3 bg-slate-900 border-t border-slate-800">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider">rstate.jtsmiddleeast.com</p>
+                  <p className="text-sm font-bold text-white truncate mt-0.5">
+                    {data.seo?.title?.trim() || `${data.title || 'Project'} | SaffPoll`}
+                  </p>
+                  <p className="text-xs text-slate-400 truncate mt-0.5">
+                    {data.seo?.description?.trim() || data.overview?.slice(0, 120) || 'Premium architectural excellence and quality construction.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SEO Input Form Fields */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+              <Globe className="w-5 h-5 text-amber-400" /> Search Engine Optimization Details
+            </h2>
+
+            <div className="grid grid-cols-1 gap-5">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-slate-300">
+                    Custom SEO Title Tag
+                  </label>
+                  <span className={`text-xs ${((data.seo?.title || '').length > 60) ? 'text-amber-400' : 'text-slate-500'}`}>
+                    {(data.seo?.title || '').length} / 60 characters
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={data.seo?.title || ''}
+                  onChange={(e) => handleSeoChange('title', e.target.value)}
+                  placeholder={`${data.title || 'Project'} | ${data.category || 'Luxury Development'} in ${data.location || 'New Delhi'} - SaffPoll`}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Default: <span className="text-slate-300 italic">{data.title ? `${data.title} | ${data.category || 'Development'} - SaffPoll` : 'Project Title | SaffPoll'}</span>
+                </p>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-slate-300">
+                    Meta Description
+                  </label>
+                  <span className={`text-xs ${((data.seo?.description || '').length > 160) ? 'text-amber-400' : 'text-slate-500'}`}>
+                    {(data.seo?.description || '').length} / 160 characters
+                  </span>
+                </div>
+                <textarea
+                  rows="3"
+                  value={data.seo?.description || ''}
+                  onChange={(e) => handleSeoChange('description', e.target.value)}
+                  placeholder="Compelling 120-160 character summary that appears in Google search engine results..."
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Leave empty to automatically use the first 155 characters of the project overview.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    SEO Keywords (Comma Separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={data.seo?.keywords || ''}
+                    onChange={(e) => handleSeoChange('keywords', e.target.value)}
+                    placeholder="residences, new delhi, modern apartments, saffpoll"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Canonical URL Override
+                  </label>
+                  <input
+                    type="text"
+                    value={data.seo?.canonical_url || ''}
+                    onChange={(e) => handleSeoChange('canonical_url', e.target.value)}
+                    placeholder={`https://rstate.jtsmiddleeast.com/project/${project?.slug || id}`}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Default canonical URL points directly to this project's canonical page.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Open Graph / Social Sharing Image URL
+                  </label>
+                  <input
+                    type="text"
+                    value={data.seo?.og_image || ''}
+                    onChange={(e) => handleSeoChange('og_image', e.target.value)}
+                    placeholder="https://example.com/custom-og-image.jpg"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Default uses the project's main Hero image.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Social Image Alt Text
+                  </label>
+                  <input
+                    type="text"
+                    value={data.seo?.image_alt || ''}
+                    onChange={(e) => handleSeoChange('image_alt', e.target.value)}
+                    placeholder="Descriptive alt text for the preview image"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Schema.org Structured Data Entity Type
+                  </label>
+                  <select
+                    value={data.seo?.schema_type || 'Accommodation'}
+                    onChange={(e) => handleSeoChange('schema_type', e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    <option value="Accommodation">Accommodation (Apartment / Residence)</option>
+                    <option value="ApartmentComplex">ApartmentComplex (Multi-unit Development)</option>
+                    <option value="RealEstateListing">RealEstateListing (Property For Sale)</option>
+                    <option value="CreativeWork">CreativeWork (Design Portfolio Item)</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col justify-center space-y-3 pt-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={data.seo?.noindex || false}
+                      onChange={(e) => handleSeoChange('noindex', e.target.checked)}
+                      className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-white">Noindex</span>
+                      <span className="text-xs text-slate-400 block">Hide this project from Google and search engines</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={data.seo?.nofollow || false}
+                      onChange={(e) => handleSeoChange('nofollow', e.target.checked)}
+                      className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-white">Nofollow</span>
+                      <span className="text-xs text-slate-400 block">Instruct search crawlers not to follow links on this page</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>

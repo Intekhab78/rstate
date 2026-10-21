@@ -14,6 +14,9 @@ import Services from "./pages/Services";
 import ContactUs from "./pages/ContactUs";
 import AdminApp from "./admin/AdminApp";
 import ProjectDetail from "./pages/ProjectDetail";
+import Design2 from "./pages/Design2";
+import NotFound from "./pages/NotFound";
+import SEO from "./components/SEO";
 
 // Scroll to top or scroll to target anchor hash on route change
 function ScrollToTop() {
@@ -37,6 +40,11 @@ function ScrollToTop() {
 function Home() {
   return (
     <>
+      <SEO
+        title="SaffPoll | Engineering, Architecture & Premium Developments"
+        description="SaffPoll delivers contemporary architectural excellence, functional residential spaces, and premium developments built with enduring quality."
+        canonicalUrl="https://rstate.jtsmiddleeast.com/"
+      />
       <HeroSection />
       <CoreValues />
       <HowItWorks />
@@ -60,7 +68,8 @@ function PublicLayout() {
         <Route path="/services" element={<Services />} />
         <Route path="/contactUs" element={<ContactUs />} />
         <Route path="/project/:slug" element={<ProjectDetail />} />
-
+        <Route path="/design2" element={<Design2 />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <FooterSection />
     </>

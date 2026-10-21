@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import SEO from "../components/SEO.jsx";
 import {
   ArrowRight,
   Building2,
@@ -148,7 +149,9 @@ function ServicesHero() {
       <div className="absolute inset-0">
         <img
           src={images.hero}
-          alt="Saffpoll construction services"
+          alt="Saffpoll premier building construction and engineering services"
+          fetchPriority="high"
+          decoding="async"
           className="h-full w-full object-cover"
         />
 
@@ -327,8 +330,9 @@ function ServiceSection({ service, index }) {
               <div className="aspect-[1.12/0.86] overflow-hidden">
                 <img
                   src={service.image}
-                  alt={service.title}
+                  alt={`${service.title} - SaffPoll Construction & Engineering Services`}
                   loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 
@@ -664,6 +668,8 @@ function ExpertiseSection() {
           src={images.quality}
           alt=""
           aria-hidden="true"
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover opacity-20"
         />
 
@@ -807,8 +813,80 @@ export default function Services() {
     });
   }, []);
 
+  const servicesSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    serviceType: "Construction, Architecture, and Real Estate Development Services",
+    name: "SaffPoll Comprehensive Building & Construction Services",
+    description:
+      "Explore SaffPoll's end-to-end building and construction services, including residential developments, commercial joint ventures, civil engineering, and architectural planning.",
+    url: "https://rstate.jtsmiddleeast.com/services",
+    provider: {
+      "@type": "Organization",
+      name: "SaffPoll Developments",
+      url: "https://rstate.jtsmiddleeast.com",
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "India",
+    },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Building & Development Services",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Building Construction",
+            description: "Quality construction solutions for residential and commercial buildings.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Venture Developments",
+            description: "Planned developments designed around practical infrastructure and long-term value.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Civil Engineering & Structural Works",
+            description: "Reliable civil construction with high safety standards and modern engineering methods.",
+          },
+        },
+      ],
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://rstate.jtsmiddleeast.com/",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Services",
+          item: "https://rstate.jtsmiddleeast.com/services",
+        },
+      ],
+    },
+  };
+
   return (
     <main className="overflow-hidden bg-white font-['DM_Sans',sans-serif]">
+      <SEO
+        title="Comprehensive Construction & Engineering Services | SaffPoll"
+        description="Explore SaffPoll's end-to-end building and construction services, including residential developments, commercial joint ventures, civil engineering, and architectural planning."
+        canonicalUrl="https://rstate.jtsmiddleeast.com/services"
+        structuredData={servicesSchema}
+      />
       <ServicesHero />
 
       {services.map((service, index) => (

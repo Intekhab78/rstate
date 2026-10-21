@@ -53,6 +53,13 @@ const FALLBACK_CTA_BUTTONS = [
   { id: 'cta_btn_2', enabled: true, text: 'Call Our Team', link: 'tel:+919810464083', style: 'outline', icon: 'Phone' }
 ];
 
+const FALLBACK_CONTACT_CARDS = [
+  { id: 'card_phone', enabled: true, icon: "Phone",  label: "Phone", href: "tel:+919810464083", lines: ["+91 98104 64083", "+91 85959 64083"] },
+  { id: 'card_email', enabled: true, icon: "Mail",   label: "Email", href: "mailto:firoz@saffpoll.com", lines: ["firoz@saffpoll.com"] },
+  { id: 'card_address', enabled: true, icon: "MapPin", label: "Address", href: "", lines: ["144, Pocket 1 Street, Pocket 1,", "Jasola Vihar, New Delhi, Delhi, India"] },
+  { id: 'card_hours', enabled: true, icon: "Clock3", label: "Working Hours", href: "", lines: ["Mon – Fri: 09:00 AM – 05:00 PM", "Saturday & Sunday: Closed"] },
+];
+
 function AdminContactPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -69,7 +76,7 @@ function AdminContactPage() {
     buttons: []
   });
 
-  const [contactCards, setContactCards] = useState([]);
+  const [contactCards, setContactCards] = useState(FALLBACK_CONTACT_CARDS);
 
   const [formSettings, setFormSettings] = useState({
     enabled: true,
@@ -134,29 +141,33 @@ function AdminContactPage() {
       setHero(prev => ({
         ...prev,
         ...d.hero,
-        tag: d.hero?.tag || 'Get In Touch',
-        title: d.hero?.title || "Let's Build Something Together",
-        subtitle: d.hero?.subtitle || "Whether you're planning a new project or have questions about our services, we're here to understand your requirements.",
-        bg_image: d.hero?.bg_image || "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2400&q=90",
+        tag: d.hero?.tag !== undefined ? d.hero.tag : 'Get In Touch',
+        title: d.hero?.title !== undefined ? d.hero.title : "Let's Build Something Together",
+        subtitle: d.hero?.subtitle !== undefined ? d.hero.subtitle : "Whether you're planning a new project or have questions about our services, we're here to understand your requirements.",
+        bg_image: d.hero?.bg_image !== undefined ? d.hero.bg_image : "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2400&q=90",
       }));
 
-      if (Array.isArray(d.contact_cards) && d.contact_cards.length > 0) {
+      if (Array.isArray(d.contact_cards) && d.contact_cards.length >= 4) {
         setContactCards(d.contact_cards);
+      } else if (Array.isArray(d.contact_cards) && d.contact_cards.length > 0) {
+        const existingLabels = d.contact_cards.map(c => (c.label || '').toLowerCase());
+        const merged = [...d.contact_cards];
+        FALLBACK_CONTACT_CARDS.forEach(defCard => {
+          if (!existingLabels.some(l => l.includes(defCard.label.toLowerCase()) || defCard.label.toLowerCase().includes(l))) {
+            merged.push(defCard);
+          }
+        });
+        setContactCards(merged);
       } else {
-        setContactCards([
-          { id: 'cc_1', enabled: true, icon: "Phone",  label: "Phone", href: "tel:+919810464083", lines: ["+91 98104 64083", "+91 85959 64083"] },
-          { id: 'cc_2', enabled: true, icon: "Mail",   label: "Email", href: "mailto:firoz@saffpoll.com", lines: ["firoz@saffpoll.com", "Send your project requirements"] },
-          { id: 'cc_3', enabled: true, icon: "MapPin", label: "Address", lines: ["144, Pocket 1 Street, Pocket 1,", "Jasola Vihar, New Delhi, India"] },
-          { id: 'cc_4', enabled: true, icon: "Clock3", label: "Working Hours", lines: ["Mon - Fri: 09:00 AM - 05:00 PM", "Saturday & Sunday: Closed"] },
-        ]);
+        setContactCards(FALLBACK_CONTACT_CARDS);
       }
 
       setFormSettings(prev => ({
         ...prev,
         ...d.form_settings,
-        tag: d.form_settings?.tag || 'Contact Saffpoll',
-        title: d.form_settings?.title || 'Send Us a Message',
-        description: d.form_settings?.description || '',
+        tag: d.form_settings?.tag !== undefined ? d.form_settings.tag : 'Contact Saffpoll',
+        title: d.form_settings?.title !== undefined ? d.form_settings.title : 'Send Us a Message',
+        description: d.form_settings?.description !== undefined ? d.form_settings.description : '',
         service_options: (Array.isArray(d.form_settings?.service_options) && d.form_settings.service_options.length > 0)
           ? d.form_settings.service_options
           : [
@@ -171,15 +182,15 @@ function AdminContactPage() {
       setOfficeInfo(prev => ({
         ...prev,
         ...d.office_info,
-        tag: d.office_info?.tag || 'Our Office',
-        title: d.office_info?.title || 'Visit or Connect With Us',
-        description: d.office_info?.description || 'Saffpoll is based in Jasola Vihar, New Delhi. Reach out to discuss your construction, renovation, or commercial project requirements.',
-        badge: d.office_info?.badge || 'Saffpoll',
-        heading: d.office_info?.heading || 'Jasola Vihar, New Delhi',
-        image_url: d.office_info?.image_url || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=90',
+        tag: d.office_info?.tag !== undefined ? d.office_info.tag : 'Our Office',
+        title: d.office_info?.title !== undefined ? d.office_info.title : 'Visit or Connect With Us',
+        description: d.office_info?.description !== undefined ? d.office_info.description : 'Saffpoll is based in Jasola Vihar, New Delhi. Reach out to discuss your construction, renovation, or commercial project requirements.',
+        badge: d.office_info?.badge !== undefined ? d.office_info.badge : 'Saffpoll',
+        heading: d.office_info?.heading !== undefined ? d.office_info.heading : 'Jasola Vihar, New Delhi',
+        image_url: d.office_info?.image_url !== undefined ? d.office_info.image_url : 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=90',
         address_lines: (Array.isArray(d.office_info?.address_lines) && d.office_info.address_lines.length > 0) ? d.office_info.address_lines : ['144, Pocket 1 Street, Pocket 1,', 'Jasola Vihar, New Delhi, India'],
         phones: (Array.isArray(d.office_info?.phones) && d.office_info.phones.length > 0) ? d.office_info.phones : ['+91 98104 64083', '+91 85959 64083'],
-        email: d.office_info?.email || 'firoz@saffpoll.com'
+        email: d.office_info?.email !== undefined ? d.office_info.email : 'firoz@saffpoll.com'
       }));
 
       if (Array.isArray(d.quick_actions) && d.quick_actions.length > 0) {
@@ -193,8 +204,10 @@ function AdminContactPage() {
       setMap(prev => ({
         ...prev,
         ...d.map,
-        tag: d.map?.tag || 'Find Us',
-        title: d.map?.title || 'Our Location'
+        tag: d.map?.tag !== undefined ? d.map.tag : 'Find Us',
+        title: d.map?.title !== undefined ? d.map.title : 'Our Location',
+        maps_url: d.map?.maps_url !== undefined ? d.map.maps_url : '',
+        embed_url: d.map?.embed_url !== undefined ? d.map.embed_url : '',
       }));
 
       if (Array.isArray(d.faqs) && d.faqs.length > 0) {
@@ -208,8 +221,9 @@ function AdminContactPage() {
       setFinalCTA(prev => ({
         ...prev,
         ...d.final_cta,
-        tag: d.final_cta?.tag || "Let's Build Together",
-        title: d.final_cta?.title || 'Ready to Start Your Project?',
+        tag: d.final_cta?.tag !== undefined ? d.final_cta.tag : "Let's Build Together",
+        title: d.final_cta?.title !== undefined ? d.final_cta.title : 'Ready to Start Your Project?',
+        subtitle: d.final_cta?.subtitle !== undefined ? d.final_cta.subtitle : '',
         buttons: (Array.isArray(d.final_cta?.buttons) && d.final_cta.buttons.length > 0) ? d.final_cta.buttons : FALLBACK_CTA_BUTTONS
       }));
     }

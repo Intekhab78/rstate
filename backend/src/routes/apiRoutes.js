@@ -29,7 +29,7 @@ import { upload } from '../utils/upload.js';
 const router = express.Router();
 
 // Defined schema field filters for safe CRUD
-const projectFields = ['title', 'slug', 'category', 'location', 'description', 'image_url', 'status', 'details_json'];
+const projectFields = ['title', 'slug', 'category', 'location', 'description', 'image_url', 'status', 'design_template', 'seo', 'details_json'];
 const serviceFields = ['title', 'icon', 'description', 'details_json'];
 const teamFields = ['name', 'role', 'image_url', 'bio'];
 const insightFields = ['title', 'author', 'date', 'category', 'summary', 'content', 'image_url'];
